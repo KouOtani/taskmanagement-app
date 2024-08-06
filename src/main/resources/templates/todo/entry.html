@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title th:text="#{todoEntry}"></title>
+  <!--CSS読み込み-->
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/css/login/style.css}">
+  <!--JS読み込み-->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}" defer></script>
+</head>
+
+<body>
+  <!-- コンテナ -->
+  <div layout:fragment="content">
+
+    <div class="container">
+      <div class="row my-2">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-6 alert alert-info text-center">
+          作業を登録してください
+        </div>
+        <div class="col-sm-3"></div>
+      </div>
+    </div>
+
+    <!-- 入力フォーム -->
+    <div class="align-items-center my-2">
+      <form th:action="@{/todo/entry}" method="post" class="container form-input" th:object="${entryForm}">
+        <!--項目名-->
+        <div class="form-group mb-3">
+          <label class="form-label" for="itemName" th:text="#{itemName}"></label>
+          <input type="text" class="form-control" th:field="*{itemName}" th:errorclass="is-invalid"
+            placeholder="登録内容をここに入力してください" />
+          <div class="invalid-feedback" th:errors="*{itemName}"></div>
+        </div>
+        <!--担当者-->
+        <div class="form-group mb-3">
+          <label class="form-label" for="userId" th:text="#{manager}"></label>
+          <select class="form-control" th:field="*{userId}" th:errorclass="is-invalid">
+            <option value="" selected disabled>選択してください</option>
+            <option th:each="item : ${managerList}" th:value="${item.id}"
+              th:text="${item.familyName + item.firstName}" id="userId">
+            </option>
+          </select>
+          <div class="text-danger" th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}">
+          </div>
+        </div>
+        <!--期限-->
+        <div class="form-group mb-3">
+          <label class="form-label" for="expireDate" th:text="#{expireDate}"></label>
+          <input type="date" class="form-control" th:field="*{expireDate}" th:errorclass="is-invalid" />
+          <div class="invalid-feedback" th:errors="*{expireDate}"></div>
+        </div>
+        <!--完了チェック-->
+        <div class="form-group form-check mb-3">
+          <input type="checkbox" class="form-check-input" th:field="*{isFinished}" />
+          <label class="form-label" for="isFinished" th:text="#{isFinished}"></label>
+        </div>
+
+        <button class="btn btn-primary" type="submit" th:text="#{registration}">
+        </button>
+        <a th:href="@{/todo/list}" th:text="#{cancel}" class="btn btn-outline-primary"></a>
+
+      </form>
+    </div>
+  </div>
+  <!-- 入力フォーム ここまで -->
+
+  </div>
+
+  <!-- コンテナ ここまで -->
+
+</body>
+
+</html>

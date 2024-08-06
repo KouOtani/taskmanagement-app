@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Mapperとxmlのマッピング -->
+<mapper namespace="katachi.spring.exercise.repository.UserMapper">
+
+  <!-- マッピング定義(ユーザー) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.MUser" id="user">
+    <id column="id" property="id" />
+    <result column="user" property="user" />
+    <result column="pass" property="pass" />
+    <result column="family_name" property="familyName" />
+    <result column="first_name" property="firstName" />
+    <result column="is_admin" property="isAdmin" />
+    <result column="is_deleted" property="isDeleted" />
+    <result column="create_date_time" property="createDateTime" />
+    <result column="update_date_time" property="updateDateTime" />
+    <collection property="items" resultMap="items"
+      columnPrefix="items_" />
+  </resultMap>
+
+  <!-- マッピング定義(作業項目) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.Items" id="items">
+    <id column="id" property="id" />
+    <result column="user_id" property="userId" />
+    <result column="item_name" property="itemName" />
+    <result column="registration_date" property="registrationDate" />
+    <result column="expire_date" property="expireDate" />
+    <result column="finished_date" property="finishedDate" />
+    <result column="create_date_time" property="createDateTime" />
+    <result column="update_date_time" property="updatDdateTime" />
+  </resultMap>
+
+  <!-- ログインユーザー情報取得 -->
+  <select id="findLoginUser" resultMap="user">
+    select * from users
+    where user = #{id}
+  </select>
+
+  <!-- usersテーブル取得 -->
+  <select id="getUsers" resultType="MUser">
+    select
+    id,
+    user,
+    pass,
+    family_name,
+    first_name,
+    is_admin,
+    create_date_time,
+    update_date_time
+    from
+    users
+  </select>
+
+
+  <!-- 作業項目一件登録 -->
+  <insert id="insertItems">
+    insert into todo_items(
+    item_name,
+    user_id,
+    registration_date,
+    expire_date,
+    finished_date
+    )
+    values(
+    #{itemName},
+    #{userId},
+    #{registrationDate},
+    #{expireDate},
+    #{finishedDate}
+    )
+  </insert>
+
+  <!-- 作業項目複数件取得 -->
+  <select id="findMany" resultType="Items">
+    select
+    todo_items.id,
+    user_id,
+    item_name,
+    registration_date,
+    expire_date,
+    finished_date,
+    concat(users.family_name, users.first_name) as fullName
+    from
+    todo_items
+    join
+    users
+    on
+    users.id = todo_items.user_id
+    <where>
+      <if test="itemName != null">
+        item_name like concat('%', #{searchWord}, '%')
+      </if>
+      <if test="itemName != null">
+        or concat(users.family_name, users.first_name) like concat('%', #{searchWord}, '%')
+      </if>
+    </where>
+    order by
+    todo_items.expire_date
+  </select>
+
+  <!-- 作業項目１件検索 -->
+  <select id="findOne" resultType="Items">
+    select
+    todo_items.id,
+    user_id,
+    item_name,
+    registration_date,
+    expire_date,
+    finished_date,
+    concat(users.family_name, users.first_name) as fullName
+    from
+    todo_items
+    join
+    users
+    on
+    users.id = todo_items.user_id
+    where
+    todo_items.id = #{id}
+  </select>
+
+  <!-- 作業項目１件更新 -->
+  <update id="updateItem">
+    update
+    todo_items
+    set
+    item_name = #{itemName},
+    user_id = #{userId},
+    expire_date = #{expireDate},
+    finished_date = #{finishedDate}
+    where
+    id = #{id}
+  </update>
+
+  <!-- 作業項目１件削除 -->
+  <delete id="deleteItem">
+    delete
+    from
+    todo_items
+    where
+    id = #{id}
+  </delete>
+
+  <!-- 完了日１件更新 -->
+  <update id="completeItem">
+    update
+    todo_items
+    set
+    finished_date = #{finishedDate}
+    where
+    id = #{id}
+  </update>
+
+</mapper>

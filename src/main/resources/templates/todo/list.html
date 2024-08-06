@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title th:text="#{todoList}"></title>
+  <!--CSS読み込み-->
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/css/todo/style.css}">
+  <!--JS読み込み-->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}" defer></script>
+</head>
+
+<body>
+  <!-- ナビゲーション -->
+  <nav class="navbar navbar-expand-lg bg-info">
+    <div class="container-fluid">
+      <span class="navbar-brand text-white" th:text="#{title}"></span>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link text-white" th:href="@{/todo/list}" th:text="#{todoList}"></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" th:href="@{/todo/entry}" th:text="#{todoEntry}"></a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <span class="nav-link text-white">
+              ようこそ<span sec:authentication="principal.fullName"></span>さん
+            </span>
+
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <form class="d-flex pe-3" role="search" th:action="@{/todo/list}" method="get"
+              th:object="${searchForm}">
+              <input class="form-control me-2 w-auto" type="search" placeholder="検索" aria-label="Search"
+                th:field="*{searchWord}">
+              <button class="btn btn-primary text-white" type="submit" th:text="#{search}"></button>
+            </form>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <form method="post" th:action="@{/logout}">
+              <button class="btn btn-danger navbar-brand text-white" type="submit" th:text="#{logout}">
+              </button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- ナビゲーション ここまで -->
+
+  <!--作業項目一覧　ここから-->
+  <div class="container mt-3">
+    <table class="table table-striped table-bordered table-hover">
+      <thead class="thead-light">
+        <tr>
+          <th th:text="#{itemName}"></th>
+          <th th:text="#{manager}"></th>
+          <th th:text="#{registrationDate}"></th>
+          <th th:text="#{expireDate}"></th>
+          <th th:text="#{isFinished}"></th>
+          <th th:text="#{operation}"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <div th:each="item: ${itemList}">
+          <th:block th:if="${item.finishedDate} == null">
+            <tr th:class="${item.expireDate} < ${today} ? 'table-danger'">
+          </th:block>
+          <th:block th:if="${item.finishedDate} != null">
+            <tr class="del">
+          </th:block>
+          <td class="align-middle" th:text="${item.itemName }"></td>
+          <td class="align-middle" th:text="${item.fullName}"></td>
+          <td class="align-middle" th:text="${#dates.format(item.registrationDate,'YYYY/MM/dd')}">
+          </td>
+          <td class="align-middle" th:text="${#dates.format(item.expireDate,'YYYY/MM/dd')}"></td>
+          <td class="align-middle"
+            th:text="${item.finishedDate} == null ? '未' : ${#dates.format(item.finishedDate,'YYYY/MM/dd')}">
+          </td>
+          <td class="button">
+            <a class="btn btn-success" th:href="@{'/todo/update/complete/' + ${item.id}}"
+              th:text="#{complete}"></a>
+            <a class="btn btn-primary" th:href="@{'/todo/update/' + ${item.id}}" th:text="#{update}"></a>
+            <a class="btn btn-danger" th:href="@{'/todo/delete/' + ${item.id}}" th:text="#{delete}"></a>
+          </td>
+          </tr>
+        </div>
+      </tbody>
+    </table>
+  </div>
+  <!--作業項目一覧　ここまで-->
+</body>
+
+</html>
