@@ -1,26 +1,40 @@
 package katachi.spring.exercise.form;
 
-import java.util.Date;
+import java.time.LocalDate;
 
-import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
+import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
 import lombok.Data;
 
 @Data
-public class EntryForm {
+public class TaskRegistrationForm {
 
-    @NotBlank
-    @Length(max = 100)
-    private String itemName;	//項目名
+	private Integer id;
 
-    private Integer userId;		//担当者
+	@NotBlank
+	@Size(max = 100)
+	private String title; // タスクのタイトル
 
-    @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date expireDate;	//期限日
+	private String description; // タスクの説明
 
-    private Boolean isFinished;	//完了のチェック
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate dueDate; // 期限日
+
+	@NotNull
+	private TaskStatus status; // タスクの状態
+
+	@NotNull
+	private TaskPriority priority; // タスクの優先度
+
+	private String name; //タスクのタグ
+
+	private Integer assigneeId; // 担当者のID
+
+	private Integer projectId; //プロジェクトのID
+
 }

@@ -13,9 +13,16 @@
 <body>
   <!--ヘッダー-->
   <nav layout:replace="~{layout/header::header}"></nav>
-  <!--コンテンツ-->
+  <!--サイドバー-->
   <div class="container-fluid">
-    <div layout:fragment="content"></div>
+    <div class="row">
+      <!-- サイドバー -->
+      <aside layout:replace="~{layout/sidebar::sidebar}"></aside>
+      <!-- メインコンテンツ -->
+      <main class="col-md-9 p-3">
+        <div layout:fragment="content" class="my-2"></div>
+      </main>
+    </div>
   </div>
 </body>
 

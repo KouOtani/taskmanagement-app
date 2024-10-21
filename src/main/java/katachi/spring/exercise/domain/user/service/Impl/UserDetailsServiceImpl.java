@@ -22,15 +22,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	private UserService service;
 
 	@Override
-	public UserDetails loadUserByUsername(String username)
+	public UserDetails loadUserByUsername(String email)
 			throws UsernameNotFoundException {
 
 		//ユーザー情報取得
-		MUser loginUser = service.getLoginUser(username);
+		MUser loginUser = service.getUserByEmail(email);
 
 		//ユーザーが存在しない場合
 		if (loginUser == null) {
-			throw new UsernameNotFoundException(username);
+			throw new UsernameNotFoundException(email);
 		}
 
 		//権限List作成
@@ -39,8 +39,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		authorities.add(authority);
 
 		//UserDetails生成
-		UserDetails userDetails = (UserDetails) new ExtendedUser(loginUser.getUser(),
-				loginUser.getPass(),
+		UserDetails userDetails = (UserDetails) new ExtendedUser(loginUser.getId(),
+				loginUser.getEmail(),
+				loginUser.getPassword(),
 				authorities,
 				loginUser.getFamilyName(),
 				loginUser.getFirstName());

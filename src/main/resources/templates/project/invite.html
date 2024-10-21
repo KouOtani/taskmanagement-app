@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout2}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>メンバー招待</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <!-- Bootstrap JS -->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <h2 class="mb-4">メンバーを招待する</h2>
+    <h4 class="mb-5">プロジェクト: 「<span th:text="${project.title}"></span>」への招待</h4>
+    <!-- 招待されたメンバー一覧 -->
+    <div class="mb-4">
+      <h5>現在のメンバー</h5>
+      <ul class="list-group w-50">
+        <li th:each="member : ${projectMembers}"
+          class="list-group-item d-flex justify-content-between align-items-center">
+          <span th:text="${member.memberName}"></span>
+          <span th:text="'役割: ' + ${member.role}" class="badge"
+            th:classappend="|bg-${member.role == 'リーダー' ? 'primary' : 'secondary'}|"></span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- メンバー検索フォーム -->
+    <form th:action="@{/project/invite/{id}(id=${project.id})}" method="get" class="mb-4">
+      <div class="mb-3">
+        <label for="email" class="form-label">招待するユーザーIDを入力してください</label>
+        <div class="d-flex">
+          <input class="form-control me-2" type="search" placeholder="ユーザーIDで検索" aria-label="Search"
+            th:value="${email}" name="email" style="width: 400px;">
+          <button class="btn btn-outline-secondary" type="submit" th:text="#{search}"></button>
+        </div>
+      </div>
+    </form>
+
+    <!-- フラッシュメッセージの表示 -->
+    <div th:if="${message != null}" class="alert alert-success mt-3 w-50" role="alert">
+      <div>
+        <span th:text="${message}"></span>
+      </div>
+    </div>
+
+    <!-- エラーメッセージの表示 -->
+    <div th:if="${errorMessage != null}" class="alert alert-danger mt-3 w-50" role="alert">
+      <div>
+        <span th:text="${errorMessage}"></span>
+      </div>
+    </div>
+
+    <!-- 検索結果が見つかり、エラーメッセージがない場合 -->
+    <div th:if="${searchedUser != null and errorMessage == null}">
+      <h5>検索結果</h5>
+      <p>ユーザー名: <strong th:text="${searchedUser.fullName}"></strong></p>
+
+      <!-- 招待ボタン -->
+      <form th:action="@{/project/invite/{id}/add(id=${project.id})}" method="post">
+        <input type="hidden" name="inviteeId" th:value="${searchedUser.id}">
+        <input type="hidden" name="email" th:value="${searchedUser.email}">
+        <button type="submit" class="btn btn-success">このユーザーを招待</button>
+      </form>
+    </div>
+
+    <!-- 検索結果が見つからない場合 -->
+    <!--    <div th:if="${searchedUser == null and email != null and email != ''}">-->
+    <!--      <div class="alert alert-danger mt-3 w-50" role="alert">-->
+    <!--        <span th:text="${errorMessage != null}"></span>-->
+    <!--      </div>-->
+    <!--    </div>-->
+  </div>
+</body>
+
+</html>

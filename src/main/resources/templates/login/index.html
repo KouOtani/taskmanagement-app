@@ -4,20 +4,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title th:text="#{login}"></title>
+  <title th:text="#{app_name}"></title>
   <!--CSS読み込み-->
   <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
-  <link rel="stylesheet" th:href="@{/css/login/style.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
   <!--JS読み込み-->
   <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}" defer></script>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md navbar-dark bg-info">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light pt-3">
     <div class="container-fluid">
-      <span class="navbar-brand" th:text="#{title}"></span>
+      <span class="navbar-brand text-dark" th:text="#{app_name}"></span>
     </div>
   </nav>
+
   <div class="align-items-center py-4">
     <form method="post" th:action="@{/login}" class="form-login text-center">
       <h1 class="h3 mb-3">ログインしてください</h1>
@@ -27,16 +28,19 @@
       </p>
       <!--ユーザーID-->
       <div class="form-group mb-3">
-        <label  for="userId" class="sr-only py-2" th:text="#{userId}"></label>
-        <input type="text" class="form-control" placeholder="ユーザーID" name="userId" id="userId"/>
+        <label for="email" class="sr-only py-2" th:text="#{email}"></label>
+        <input type="email" class="form-control" placeholder="ユーザーID" name="email" id="email" />
       </div>
       <!--パスワード-->
       <div class="form-group mb-5">
         <label for="password" class="sr-only py-2" th:text="#{password}"></label>
-        <input type="password" class="form-control" placeholder="パスワード" name="password" id="password"/>
+        <input type="password" class="form-control" placeholder="パスワード" name="password" id="password" />
       </div>
       <button class="btn btn-primary w-50 py-2" type="submit" th:text="#{login}"></button>
     </form>
+    <div class="text-center">
+      <a th:href="@{/user/signup}">新規会員登録はこちら</a>
+    </div>
   </div>
 </body>
 

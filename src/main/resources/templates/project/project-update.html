@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout2}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>プロジェクト編集</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <!-- Bootstrap JS -->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <h2 class="mb-4">プロジェクトを編集</h2>
+    <form th:action="@{/update/project}" method="post" th:object="${projectRegistrationForm}">
+      <!--タスクのid-->
+      <input type="hidden" th:field="*{id}" />
+      <!-- タスク名 -->
+      <div class="mb-3">
+        <label for="title" class="form-label">プロジェクト名</label>
+        <input type="text" class="form-control" th:field="*{title}" th:errorclass="is-invalid"
+          placeholder="プロジェクト名を入力してください" />
+        <div class="invalid-feedback" th:errors="*{title}"></div>
+      </div>
+
+      <!-- タスクの説明 -->
+      <div class="mb-3">
+        <label for="description" class="form-label">プロジェクトの説明</label>
+        <textarea class="form-control" th:field="*{description}" rows="4" th:errorclass="is-invalid"
+          placeholder="タスクの説明を入力してください" /></textarea>
+        <div class="invalid-feedback" th:errors="*{description}"></div>
+      </div>
+
+      <!-- タスクの期限 -->
+      <div class="mb-3 w-50">
+        <label for="dueDate" class="form-label">期限</label>
+        <input type="date" class="form-control" th:field="*{dueDate}" th:errorclass="is-invalid">
+        <div class="invalid-feedback" th:errors="*{dueDate}"></div>
+      </div>
+
+      <!-- ステータス -->
+      <div class="mb-3 w-50">
+        <label for="status" class="form-label">ステータス</label>
+        <select class="form-select" th:field="*{status}">
+          <option th:each="status : ${status}" th:value="${status.name()}" th:text="${status.displayValue}">
+          </option>
+        </select>
+      </div>
+
+      <!-- タグ -->
+      <div class="mb-3">
+        <label for="name" class="form-label">タグ</label>
+        <input type="text" class="form-control" th:field="*{name}" th:errorclass="is-invalid"
+          placeholder="タグをカンマで区切って入力">
+        <div class="invalid-feedback" th:errors="*{name}"></div>
+        <small class="form-text text-muted">複数のタグがある場合、カンマで区切って入力してください。</small>
+      </div>
+
+      <button type="submit" class="btn btn-primary">更新</button>
+      <a href="#" class="btn btn-secondary" th:href="@{/project}">キャンセル</a>
+    </form>
+  </div>
+</body>
+
+</html>

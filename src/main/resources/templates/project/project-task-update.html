@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout2}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>プロジェクトタスク編集</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <!-- Bootstrap JS -->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <h2 class="mb-4">プロジェクトタスクを編集</h2>
+    <form th:action="@{/update/project-task}" method="post" th:object="${taskRegistrationForm}">
+      <!--タスクのid-->
+      <input type="hidden" th:field="*{id}" />
+      <!--プロジェクトのid-->
+      <input type="hidden" th:field="*{projectId}" />
+      <!-- 担当者 -->
+      <div class="mb-3 w-50">
+        <label for="assigneeId" class="form-label">担当者</label>
+        <select id="assigneeId" class="form-select" th:field="*{assigneeId}" th:errorclass="is-invalid">
+          <option value="" selected>選択してください</option>
+          <!-- プロジェクトメンバーのリストを表示 -->
+          <option th:each="member : ${projectMembers}" th:value="${member.userId}"
+            th:text="${member.memberName}">
+          </option>
+        </select>
+        <div class="invalid-feedback" th:errors="*{assigneeId}"></div>
+      </div>
+      <!-- タスク名 -->
+      <div class="mb-3">
+        <label for="title" class="form-label">タスク名</label>
+        <input type="text" class="form-control" th:field="*{title}" th:errorclass="is-invalid"
+          placeholder="タスク名を入力してください" />
+        <div class="invalid-feedback" th:errors="*{title}"></div>
+      </div>
+
+      <!-- タスクの説明 -->
+      <div class="mb-3">
+        <label for="description" class="form-label">タスクの説明</label>
+        <textarea class="form-control" th:field="*{description}" rows="4" th:errorclass="is-invalid"
+          placeholder="タスクの説明を入力してください" /></textarea>
+        <div class="invalid-feedback" th:errors="*{description}"></div>
+      </div>
+
+      <!-- タスクの期限 -->
+      <div class="mb-3 w-50">
+        <label for="dueDate" class="form-label">期限</label>
+        <input type="date" class="form-control" th:field="*{dueDate}" th:errorclass="is-invalid">
+        <div class="invalid-feedback" th:errors="*{dueDate}"></div>
+      </div>
+
+      <!-- ステータス -->
+      <div class="mb-3 w-50">
+        <label for="status" class="form-label">ステータス</label>
+        <select class="form-select" th:field="*{status}">
+          <option th:each="status : ${status}" th:value="${status.name()}" th:text="${status.displayValue}">
+          </option>
+        </select>
+      </div>
+
+      <!-- 優先度 -->
+      <div class="mb-3 w-50">
+        <label for="priority" class="form-label">優先度</label>
+        <select class="form-select" th:field="*{priority}">
+          <option th:each="priority : ${priorities}" th:value="${priority.name()}"
+            th:text="${priority.displayValue}"></option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">更新</button>
+      <a class="btn btn-secondary" th:href="@{'/project-task/' + *{projectId}}">キャンセル</a>
+    </form>
+  </div>
+</body>
+
+</html>

@@ -1,107 +1,285 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout1}">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title th:text="#{todoList}"></title>
-  <!--CSS読み込み-->
+  <title th:text="#{home}"></title>
+  <!-- Bootstrap CSS -->
   <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
-  <link rel="stylesheet" th:href="@{/css/todo/style.css}">
-  <!--JS読み込み-->
-  <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <!-- Bootstrap JS -->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+  <script th:src="@{/js/form-handlers.js}" defer></script>
 </head>
 
 <body>
-  <!-- ナビゲーション -->
-  <nav class="navbar navbar-expand-lg bg-info">
-    <div class="container-fluid">
-      <span class="navbar-brand text-white" th:text="#{title}"></span>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link text-white" th:href="@{/todo/list}" th:text="#{todoList}"></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-white" th:href="@{/todo/entry}" th:text="#{todoEntry}"></a>
-          </li>
-        </ul>
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <span class="nav-link text-white">
-              ようこそ<span sec:authentication="principal.fullName"></span>さん
-            </span>
+  <!-- メインコンテンツ -->
+  <div layout:fragment="content">
+    <!-- personalPastDueTasks が null でない場合にのみ表示 -->
+    <div class="row">
+      <div th:if="${personalOneWeekDueTasks != null and !#lists.isEmpty(personalOneWeekDueTasks)}"
+        class="col-md-6">
+        <h4>期日の近い個人タスク</h4>
+        <ul class="list-group">
+          <!-- タスクごとにリストアイテムを生成 -->
+          <li th:each="task : ${personalOneWeekDueTasks}"
+            class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="p-2" style="width: 340px;">
+              <h5 class="my-2" th:text="${task.title}"></h5>
+              <!-- 締め切り日 -->
+              <p class="text-muted mb-2">
+                <i class="bi bi-calendar-event"></i> 締め切り:
+                <span th:text="${task.dueDate}"></span>
+              </p>
 
+              <!-- 期日までの残り日数を表示 -->
+              <div th:if="${task.getDaysUntilDueDate() >= 0}"
+                class="mb-0 p-2 alert alert-info d-flex align-items-center" style="width: 245px;">
+                <i class="bi bi-clock me-2"></i>
+                <span>締め切り日まで残り</span>
+                <span class="fw-bold mx-1" th:text="${task.getDaysUntilDueDate()}"></span> 日
+              </div>
+            </div>
+
+            <div>
+              <!-- アクションボタン -->
+              <a class="btn btn-sm btn-primary" th:href="@{'/update/personal-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger" th:href="@{'/delete/personal-task/' + ${task.id}}">削除</a>
+              <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
+                style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-secondary">完了</button>
+                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <input type="hidden" th:value="*{currentUri}" name="currentUri">
+              </form>
+            </div>
           </li>
         </ul>
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <form class="d-flex pe-3" role="search" th:action="@{/todo/list}" method="get"
-              th:object="${searchForm}">
-              <input class="form-control me-2 w-auto" type="search" placeholder="検索" aria-label="Search"
-                th:field="*{searchWord}">
-              <button class="btn btn-primary text-white" type="submit" th:text="#{search}"></button>
-            </form>
-          </li>
-        </ul>
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <form method="post" th:action="@{/logout}">
-              <button class="btn btn-danger navbar-brand text-white" type="submit" th:text="#{logout}">
-              </button>
-            </form>
+      </div>
+
+      <div th:if="${personalPastDueTasks != null and !#lists.isEmpty(personalPastDueTasks)}" class="col-md-6">
+        <h4>期日が過ぎた個人タスク</h4>
+        <ul class="list-group">
+          <!-- タスクごとにリストアイテムを生成 -->
+          <li th:each="task : ${personalPastDueTasks}"
+            class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="p-2" style="width: 340px;">
+              <h5 class="mb-2 font-weight-bold" th:text="${task.title}"></h5>
+              <!-- 締め切り日 -->
+              <p class="text-muted mb-2">
+                <i class="bi bi-calendar-event"></i> 締め切り:
+                <span th:text="${task.dueDate}"></span>
+              </p>
+
+              <!-- 経過日数を表示 -->
+              <div th:if="${task.getDaysSinceDueDate() > 0}" class="alert alert-danger mb-0 p-2"
+                style="width: 245px;">
+                <i class="bi bi-clock me-2"></i>
+                <span>締め切り日から</span>
+                <span class="fw-bold mx-1" th:text="${task.getDaysSinceDueDate()}"></span>
+                日経過
+              </div>
+            </div>
+            <div>
+              <!-- アクションボタン -->
+              <a class="btn btn-sm btn-primary" th:href="@{'/update/personal-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger" th:href="@{'/delete/personal-task/' + ${task.id}}">削除</a>
+              <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
+                style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-secondary">完了</button>
+                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <input type="hidden" th:value="*{currentUri}" name="currentUri">
+              </form>
+            </div>
           </li>
         </ul>
       </div>
     </div>
-  </nav>
-  <!-- ナビゲーション ここまで -->
 
-  <!--作業項目一覧　ここから-->
-  <div class="container mt-3">
-    <table class="table table-striped table-bordered table-hover">
-      <thead class="thead-light">
-        <tr>
-          <th th:text="#{itemName}"></th>
-          <th th:text="#{manager}"></th>
-          <th th:text="#{registrationDate}"></th>
-          <th th:text="#{expireDate}"></th>
-          <th th:text="#{isFinished}"></th>
-          <th th:text="#{operation}"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <div th:each="item: ${itemList}">
-          <th:block th:if="${item.finishedDate} == null">
-            <tr th:class="${item.expireDate} < ${today} ? 'table-danger'">
-          </th:block>
-          <th:block th:if="${item.finishedDate} != null">
-            <tr class="del">
-          </th:block>
-          <td class="align-middle" th:text="${item.itemName }"></td>
-          <td class="align-middle" th:text="${item.fullName}"></td>
-          <td class="align-middle" th:text="${#dates.format(item.registrationDate,'YYYY/MM/dd')}">
-          </td>
-          <td class="align-middle" th:text="${#dates.format(item.expireDate,'YYYY/MM/dd')}"></td>
-          <td class="align-middle"
-            th:text="${item.finishedDate} == null ? '未' : ${#dates.format(item.finishedDate,'YYYY/MM/dd')}">
-          </td>
-          <td class="button">
-            <a class="btn btn-success" th:href="@{'/todo/update/complete/' + ${item.id}}"
-              th:text="#{complete}"></a>
-            <a class="btn btn-primary" th:href="@{'/todo/update/' + ${item.id}}" th:text="#{update}"></a>
-            <a class="btn btn-danger" th:href="@{'/todo/delete/' + ${item.id}}" th:text="#{delete}"></a>
-          </td>
-          </tr>
-        </div>
-      </tbody>
-    </table>
+    <!-- projectPastDueTasks が null でない場合にのみ表示 -->
+    <div class="row mt-3">
+      <div th:if="${projectOneWeekDueTasks != null and !#lists.isEmpty(projectOneWeekDueTasks)}" class="col-md-6">
+        <h4>期日の近いプロジェクトタスク</h4>
+        <ul class="list-group">
+          <!-- タスクごとにリストアイテムを生成 -->
+          <li th:each="task : ${projectOneWeekDueTasks}"
+            class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="p-2" style="width: 340px;">
+              <!-- プロジェクトタイトル -->
+              <!-- プロジェクト名をクリック可能にする -->
+              <h5 class="text-primary fw-bold mb-2">
+                <a th:href="@{/project}" class="text-primary text-decoration-none">
+                  「<span th:text="${task.project.title}"></span>」
+                </a>
+              </h5>
+
+              <!-- タスクタイトル -->
+              <h5 class="mb-2" th:text="${task.title}"></h5>
+
+              <!-- 締め切り日 -->
+              <p class="text-muted mb-2">
+                <i class="bi bi-calendar-event"></i> 締め切り:
+                <span th:text="${task.dueDate}"></span>
+              </p>
+
+              <!-- 期日までの残り日数を表示 -->
+              <div th:if="${task.getDaysUntilDueDate() >= 0}"
+                class="mb-0 p-2 alert alert-info d-flex align-items-center" style="width: 245px;">
+                <i class="bi bi-clock me-2"></i>
+                <span>締め切り日まで残り</span>
+                <span class="fw-bold mx-1" th:text="${task.getDaysUntilDueDate()}"></span> 日
+              </div>
+            </div>
+
+            <div>
+              <!-- アクションボタン -->
+              <a class="btn btn-sm btn-primary" th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger" th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
+              <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
+                style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-secondary">完了</button>
+                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <input type="hidden" th:value="*{currentUri}" name="currentUri">
+              </form>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div th:if="${projectPastDueTasks != null and !#lists.isEmpty(projectPastDueTasks)}" class="col-md-6">
+        <h4>期日が過ぎたプロジェクトタスク</h4>
+        <ul class="list-group">
+          <!-- タスクごとにリストアイテムを生成 -->
+          <li th:each="task : ${projectPastDueTasks}"
+            class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="p-2" style="width: 340px;">
+              <!-- プロジェクトタイトル -->
+              <h5 class="text-primary fw-bold mb-2">
+                <a th:href="@{/project}" class="text-primary text-decoration-none">
+                  「<span th:text="${task.project.title}"></span>」
+                </a>
+              </h5>
+
+              <!-- タスクタイトル -->
+              <h5 class="mb-2" th:text="${task.title}"></h5>
+
+              <!-- 締め切り日 -->
+              <p class="text-muted mb-2">
+                <i class="bi bi-calendar-event"></i> 締め切り:
+                <span th:text="${task.dueDate}"></span>
+              </p>
+
+              <!-- 経過日数を表示 -->
+              <div th:if="${task.getDaysSinceDueDate() > 0}" class="alert alert-danger mb-0 p-2"
+                style="width: 245px;">
+                <i class="bi bi-clock me-2"></i>
+                <span>締め切り日から</span>
+                <span class="fw-bold mx-1" th:text="${task.getDaysSinceDueDate()}"></span>
+                日経過
+              </div>
+            </div>
+
+            <div>
+              <!-- アクションボタン -->
+              <a class="btn btn-sm btn-primary" th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger" th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
+              <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
+                style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-secondary">完了</button>
+                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <input type="hidden" th:value="*{currentUri}" name="currentUri">
+              </form>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 進行中のプロジェクトセクションを追加 -->
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <h4>所属プロジェクト</h4>
+        <ul class="list-group">
+          <!-- myProjectsリストをループしてプロジェクトを出力 -->
+          <li th:each="project : ${myProjects}"
+            class="list-group-item d-flex flex-column align-items-start p-3">
+
+            <!-- プロジェクト名をクリック可能にする -->
+            <h5 class="text-primary fw-bold mb-2">
+              <a th:href="@{/project}" class="text-primary text-decoration-none">
+                「<span th:text="${project.title}"></span>」
+              </a>
+            </h5>
+
+
+            <!-- プロジェクトの締め切り情報 -->
+            <p class="mb-1">
+              <strong>締め切り: </strong>
+              <span th:text="${project.dueDate}"></span>
+            </p>
+
+            <!-- プロジェクトステータス -->
+            <p class="mb-1">
+              <strong>ステータス: </strong>
+              <span class="badge"
+                th:classappend="|bg-${project.status.getDisplayValue() == '未着手' ? 'secondary' : (project.status.getDisplayValue() == '進行中' ? 'primary' : 'success')}|"
+                th:text="${project.status.getDisplayValue()}">
+              </span>
+            </p>
+
+            <!-- 残り日数の計算 -->
+            <p class="mb-1">
+              <!-- 締め切り日まで残り 1 日以上の場合 -->
+              <th:block th:if="${project.getDaysUntilDueDate() > 0}">
+                <strong>残り日数: </strong>
+                <span>締め切り日まで残り</span>
+                <span class="fw-bold mx-1" th:text="${project.getDaysUntilDueDate()}"></span> 日
+              </th:block>
+
+              <!-- 締め切り日が今日の場合 -->
+              <th:block
+                th:if="${project.getDaysUntilDueDate() == 0 && project.getDaysSinceDueDate() == 0}">
+                <strong>残り日数: </strong>
+                <span>今日が締め切り日です！</span>
+              </th:block>
+
+              <!-- 締め切り日を過ぎた場合 -->
+              <th:block th:if="${project.getDaysSinceDueDate() > 0}">
+                <strong>残り日数: </strong>
+                <span>締め切り日を過ぎて</span>
+                <span class="fw-bold text-danger mx-1"
+                  th:text="${project.getDaysSinceDueDate()}"></span> 日
+              </th:block>
+
+            </p>
+
+            <!-- プロジェクトメンバーの表示 -->
+            <p class="mb-1">
+              <strong>メンバー: </strong>
+              <span th:each="member : ${project.projectMembersList}"
+                th:text="${member.memberName} + ', '"></span>
+            </p>
+
+            <!-- タスク進捗 (完了タスク/全タスク) -->
+            <p>
+              <strong>タスク進捗: </strong>
+              <span th:text="'完了タスク: ' + ${project.completedTasks} + '/' + ${project.totalTasks}"></span>
+            </p>
+
+            <!-- 進捗バー -->
+            <div class="progress" style="width: 50%;">
+              <div class="progress-bar" role="progressbar" th:style="'width:' + ${project.progress} + '%'"
+                th:aria-valuenow="${project.progress}" aria-valuemin="0" aria-valuemax="100"
+                th:text="${project.progress} + '%'">
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
-  <!--作業項目一覧　ここまで-->
 </body>
 
 </html>

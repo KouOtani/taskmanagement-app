@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout2}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>プロジェクトチャット</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <!-- Bootstrap JS -->
+  <script th:src="@{/js/popper.min.js}" defer></script>
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+  <style>
+    .tooltip-inner {
+      white-space: pre-wrap;
+      /* ツールチップの改行を維持 */
+    }
+  </style>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <h2 class="mb-4">プロジェクトチャット</h2>
+
+    <div class="card">
+      <div class="card-body">
+        <h5>コメント一覧</h5>
+        <div th:each="comment : ${comments}">
+          <div class="border p-2 mb-2">
+            <strong th:text="${comment.user.fullName}">ユーザー名</strong>
+            <p class="mt-1" th:text="${comment.content}">コメント内容</p>
+            <small th:text="${#dates.format(comment.createdAt, 'yyyy/MM/dd HH:mm')}">投稿日</small>
+
+            <!-- リアクションアイコン -->
+            <form th:id="${comment.id}" class="ms-1"
+              th:action="@{/project/comments/react/{commentId}(commentId=${comment.id})}" method="post"
+              style="display:inline;">
+              <input type="hidden" name="userId" th:value="${session.userId}" />
+              <input type="hidden" name="projectId" th:value="${projectId}" />
+              <button type="submit" class="btn p-0 position-relative"
+                style="background: none; border: none;" th:data-bs-toggle="tooltip"
+                th:title="${comment.getReactorsFullNames()}">
+
+                <!-- アイコン (リアクション済み/未済み) -->
+                <i th:class="${comment.hasReacted ? 'bi bi-star-fill text-warning' : 'bi bi-star'}"></i>
+
+                <!-- リアクション数バッジ -->
+                <span
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  th:text="${comment.reactorCount}" th:if="${comment.reactorCount > 0}"
+                  style="font-size: 0.75rem; padding: 0.25em 0.4em;"></span>
+              </button>
+            </form>
+
+            <!-- 自分のコメントのみ編集ボタンを表示 -->
+            <div th:if="${comment.userId} == ${session.userId}">
+              <!-- 編集ボタン -->
+              <a th:href="@{/project/comments/edit/{commentId}(commentId=${comment.id}, projectId=${projectId})} + '#edit'"
+                class="btn btn-link p-0 me-1 text-primary">編集</a>
+              <!-- 削除ボタン -->
+              <form th:action="@{/project/comments/delete/{commentId}(commentId=${comment.id})}"
+                method="post" style="display:inline;" onsubmit="return confirm('削除しますか？');">
+                <input type="hidden" name="projectId" th:value="${projectId}" />
+                <button type="submit" class="btn btn-link p-0 text-danger"
+                  style="border: none; background: none;">削除</button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+
+        <h5 class="my-2" th:if="${editComment != null}">コメントを編集</h5>
+        <h5 class="my-2" th:if="${editComment == null}">新しいコメントを投稿</h5>
+
+        <form th:action="@{/project/comments}" method="post">
+          <input type="hidden" name="projectId" th:value="${projectId}" />
+          <input type="hidden" name="userId" th:value="${session.userId}" />
+          <input type="hidden" name="commentId"
+            th:value="${editComment != null} ? ${editComment.id} : null" />
+          <div class="form-group">
+            <textarea id="edit" name="content" class="form-control" rows="3" placeholder="コメントを入力..."
+              required th:text="${editComment != null} ? ${editComment.content} : ''"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary mt-2">
+            <span th:text="${editComment != null ? '編集を保存' : '投稿'}"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOMが完全に読み込まれた後にツールチップを初期化
+    document.addEventListener('DOMContentLoaded', function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    });
+  </script>
+
+
+</body>
+
+</html>

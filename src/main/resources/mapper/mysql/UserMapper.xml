@@ -9,149 +9,357 @@
   <resultMap
     type="katachi.spring.exercise.domain.user.model.MUser" id="user">
     <id column="id" property="id" />
-    <result column="user" property="user" />
-    <result column="pass" property="pass" />
+    <result column="email" property="email" />
+    <result column="password" property="password" />
     <result column="family_name" property="familyName" />
     <result column="first_name" property="firstName" />
+    <result column="full_name" property="fullName" />
     <result column="is_admin" property="isAdmin" />
     <result column="is_deleted" property="isDeleted" />
-    <result column="create_date_time" property="createDateTime" />
-    <result column="update_date_time" property="updateDateTime" />
-    <collection property="items" resultMap="items"
-      columnPrefix="items_" />
   </resultMap>
 
-  <!-- マッピング定義(作業項目) -->
+  <!-- マッピング定義(タスク) -->
   <resultMap
-    type="katachi.spring.exercise.domain.user.model.Items" id="items">
+    type="katachi.spring.exercise.domain.user.model.Task" id="task">
     <id column="id" property="id" />
-    <result column="user_id" property="userId" />
-    <result column="item_name" property="itemName" />
+    <result column="project_id" property="projectId" />
+    <result column="title" property="title" />
+    <result column="description" property="description" />
+    <result column="status" property="status" />
+    <result column="priority" property="priority" />
+    <result column="due_date" property="dueDate" />
     <result column="registration_date" property="registrationDate" />
-    <result column="expire_date" property="expireDate" />
-    <result column="finished_date" property="finishedDate" />
-    <result column="create_date_time" property="createDateTime" />
-    <result column="update_date_time" property="updatDdateTime" />
+    <collection property="tagsList" resultMap="tag"
+      columnPrefix="tag_" />
   </resultMap>
 
-  <!-- ログインユーザー情報取得 -->
-  <select id="findLoginUser" resultMap="user">
-    select * from users
-    where user = #{id}
-  </select>
+  <!-- マッピング定義(タグ) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.Tag" id="tag">
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+  </resultMap>
 
-  <!-- usersテーブル取得 -->
-  <select id="getUsers" resultType="MUser">
-    select
-    id,
-    user,
-    pass,
+  <!-- マッピング定義(タスクタグ) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.TaskTag" id="taskTag">
+    <id column="id" property="id" />
+    <result column="task_id" property="taskId" />
+    <result column="tag_id" property="tagId" />
+  </resultMap>
+
+  <!-- マッピング定義(アサイン) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.AssignedTo"
+    id="assignedTo">
+    <id column="id" property="id" />
+    <result column="task_id" property="taskId" />
+    <result column="user_id" property="userId" />
+  </resultMap>
+
+  <!-- ユーザー1件登録 -->
+  <insert id="insertUser">
+    insert into m_users(
+    email,
+    password,
     family_name,
     first_name,
-    is_admin,
-    create_date_time,
-    update_date_time
-    from
-    users
-  </select>
-
-
-  <!-- 作業項目一件登録 -->
-  <insert id="insertItems">
-    insert into todo_items(
-    item_name,
-    user_id,
-    registration_date,
-    expire_date,
-    finished_date
+    is_admin
     )
     values(
-    #{itemName},
-    #{userId},
-    #{registrationDate},
-    #{expireDate},
-    #{finishedDate}
+    #{email},
+    #{password},
+    #{familyName},
+    #{firstName},
+    #{isAdmin}
     )
   </insert>
 
-  <!-- 作業項目複数件取得 -->
-  <select id="findMany" resultType="Items">
+  <!-- ログインユーザー情報取得 -->
+  <select id="findLoginUser" resultMap="user">
     select
-    todo_items.id,
-    user_id,
-    item_name,
-    registration_date,
-    expire_date,
-    finished_date,
-    concat(users.family_name, users.first_name) as fullName
-    from
-    todo_items
-    join
-    users
-    on
-    users.id = todo_items.user_id
-    <where>
-      <if test="itemName != null">
-        item_name like concat('%', #{searchWord}, '%')
-      </if>
-      <if test="itemName != null">
-        or concat(users.family_name, users.first_name) like concat('%', #{searchWord}, '%')
-      </if>
-    </where>
-    order by
-    todo_items.expire_date
+    id,
+    email,
+    password,
+    family_name,
+    first_name,
+    CONCAT(family_name, ' ', first_name) AS full_name,
+    is_admin
+    from m_users
+    where email = #{email}
+
   </select>
 
-  <!-- 作業項目１件検索 -->
-  <select id="findOne" resultType="Items">
-    select
-    todo_items.id,
-    user_id,
-    item_name,
-    registration_date,
-    expire_date,
-    finished_date,
-    concat(users.family_name, users.first_name) as fullName
-    from
-    todo_items
-    join
-    users
-    on
-    users.id = todo_items.user_id
-    where
-    todo_items.id = #{id}
+  <!-- メールアドレス重複チェック -->
+  <select id="findUserByEmail">
+    SELECT
+    *
+    FROM
+    m_users
+    WHERE
+    email = #{email}
   </select>
 
-  <!-- 作業項目１件更新 -->
-  <update id="updateItem">
-    update
-    todo_items
-    set
-    item_name = #{itemName},
-    user_id = #{userId},
-    expire_date = #{expireDate},
-    finished_date = #{finishedDate}
+  <!-- 個人タスクを登録 -->
+  <insert id="insertPersonalTasks" useGeneratedKeys="true"
+    keyProperty="id">
+    insert into task(
+    title,
+    description,
+    status,
+    priority,
+    due_date,
+    registration_date,
+    project_id
+    )
+    values(
+    #{title},
+    #{description},
+    #{status},
+    #{priority},
+    #{dueDate},
+    #{registrationDate},
+    #{projectId}
+    )
+  </insert>
+
+  <!-- タグ重複チェック -->
+  <select id="findTagBytagName" resultType="Tag">
+    SELECT
+    *
+    FROM
+    tag
+    WHERE
+    name = #{name}
+  </select>
+
+  <!-- タグ登録 -->
+  <insert id="insertTag" useGeneratedKeys="true" keyProperty="id">
+    insert into tag(
+    name
+    )
+    values(
+    #{name}
+    )
+  </insert>
+
+  <!-- タスクタグ登録 -->
+  <insert id="insertTaskTag" useGeneratedKeys="true"
+    keyProperty="id">
+    insert into task_tag(
+    task_id,
+    tag_id
+    )
+    values(
+    #{taskId},
+    #{tagId}
+    )
+  </insert>
+
+  <!-- タスクとユーザーの割り当てを登録 -->
+  <insert id="insertAssignedTo">
+    insert into assigned_to(
+    task_id,
+    user_id
+    )
+    values(
+    #{taskId},
+    #{userId}
+    )
+  </insert>
+
+  <!-- 個人タスク複数件取得 -->
+  <select id="findManyPersonalTasks" resultMap="task">
+    SELECT
+    task.id,
+    task.title,
+    task.description,
+    task.status,
+    task.priority,
+    task.due_date,
+    task.registration_date,
+    tag.id AS tag_id,
+    tag.name AS tag_name
+    FROM
+    task
+    LEFT JOIN
+    assigned_to at ON task.id = at.task_id
+    LEFT JOIN
+    task_tag tt ON task.id = tt.task_id
+    LEFT JOIN
+    tag ON tt.tag_id = tag.id
+    WHERE
+    at.user_id = #{userId}
+    AND task.project_id IS NULL  <!-- project_idがnullのものに絞る条件 -->
+    <if test="tagName != null and tagName != ''">
+      AND task.id IN (
+      SELECT task.id
+      FROM task
+      JOIN task_tag tt ON task.id = tt.task_id
+      JOIN tag ON tt.tag_id = tag.id
+      WHERE tag.name = #{tagName}
+      )
+    </if>
+    <choose>
+      <when test="completed == true">
+        AND task.status = 'COMPLETED'
+      </when>
+      <otherwise>
+        AND task.status IN ('NOT_STARTED', 'IN_PROGRESS')
+      </otherwise>
+    </choose>
+    <if test="searchQuery != null and searchQuery != ''">
+      AND task.title LIKE CONCAT('%', #{searchQuery}, '%')
+    </if>
+    <if test="status != null">
+      AND task.status = #{status}
+    </if>
+    <if test="priority != null">
+      AND task.priority = #{priority}
+    </if>
+    <!-- 期日の昇順をデフォルトに設定 -->
+    ORDER BY task.due_date
+    <choose>
+      <when test="dueDateOrder == 'desc'">
+        DESC
+      </when>
+      <otherwise>
+        ASC
+      </otherwise>
+    </choose>
+  </select>
+
+  <!-- 期限が過ぎた個人タスクを複数件取得 -->
+  <select id="findPersonalPastDueTasks" resultMap="task">
+    SELECT
+    t.id,
+    t.title,
+    t.due_date
+    FROM
+    task t
+    LEFT JOIN
+    assigned_to at ON t.id = at.task_id
+    WHERE
+    at.user_id = #{userId}
+    AND t.project_id IS NULL  <!-- project_idがnullのものに絞る条件 -->
+    AND CURDATE() > t.due_date
+    AND t.status != 'COMPLETED'
+    ORDER BY
+    t.due_date DESC
+  </select>
+
+  <!-- 今日が期日の個人タスクを複数件取得 -->
+  <select id="findPersonalTodayDueTasks" resultMap="task">
+    SELECT
+    t.id,
+    t.title,
+    t.due_date,
+    t.priority
+    FROM
+    task t
+    LEFT JOIN
+    assigned_to at ON t.id = at.task_id
+    WHERE
+    at.user_id = #{userId}
+    AND t.project_id IS NULL  <!-- project_idがnullのものに絞る条件 -->
+    AND CURDATE() = t.due_date
+    AND t.status != 'COMPLETED'
+    ORDER BY
+    t.due_date
+  </select>
+
+  <!-- 期日が1週間以内の個人タスクを取得 -->
+  <select id="findPersonalDueOneWeekTasks" resultMap="task">
+    SELECT
+    t.id,
+    t.title,
+    t.due_date
+    FROM
+    task t
+    LEFT JOIN
+    assigned_to at ON t.id = at.task_id
+    WHERE
+    at.user_id = #{userId}
+    AND t.project_id IS NULL  <!-- project_idがnullのものに絞る条件 -->
+    AND t.due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7
+    DAY)
+    AND t.status != 'COMPLETED'
+    ORDER BY
+    t.due_date ASC
+  </select>
+
+  <!-- 個人タスク1件取得 -->
+  <select id="findPersonalTask" resultMap="task">
+    select
+    task.id,
+    task.title,
+    task.description,
+    task.status,
+    task.priority,
+    task.due_date,
+    task.registration_date,
+    tag.id as tag_id,
+    tag.name as tag_name
+    from
+    task
+    left join
+    assigned_to at on task.id = at.task_id
+    left join
+    task_tag tt on task.id = tt.task_id
+    left join
+    tag on tt.tag_id = tag.id
     where
-    id = #{id}
+    task.id = #{id}
+  </select>
+
+  <!-- タスク情報を更新 -->
+  <update id="updateTask">
+    UPDATE task
+    SET
+    title = #{title},
+    description = #{description},
+    status = #{status},
+    priority = #{priority},
+    due_date = #{dueDate}
+    WHERE id = #{id}
   </update>
 
-  <!-- 作業項目１件削除 -->
-  <delete id="deleteItem">
-    delete
-    from
-    todo_items
-    where
-    id = #{id}
+  <!-- タスクに関連付けられたタグを削除 -->
+  <delete id="deleteByTaskId">
+    DELETE FROM task_tag WHERE task_id = #{taskId}
   </delete>
 
-  <!-- 完了日１件更新 -->
-  <update id="completeItem">
-    update
-    todo_items
-    set
-    finished_date = #{finishedDate}
-    where
-    id = #{id}
+  <!-- 利用していないタグを削除 -->
+  <delete id="deleteUnusedTags">
+    DELETE FROM tag
+    WHERE id NOT IN (
+    SELECT DISTINCT tag_id
+    FROM project_tag
+    )
+    AND id NOT IN (
+    SELECT DISTINCT tag_id
+    FROM task_tag
+    )
+  </delete>
+
+  <!-- 個人タスクを削除 -->
+  <delete id="deletePersonalTask">
+    DELETE FROM task
+    WHERE id = #{taskId};
+  </delete>
+
+  <!-- '完了'に更新 -->
+  <update id="completePresonalTask">
+    UPDATE task
+    SET status = 'COMPLETED'
+    WHERE id = #{taskId}
+  </update>
+
+  <!-- '完了'から'進行中'に復元 -->
+  <update id="restoreInprogress">
+    UPDATE task
+    SET status = 'IN_PROGRESS'
+    WHERE id = #{taskId}
   </update>
 
 </mapper>

@@ -7,16 +7,28 @@ import org.springframework.security.core.userdetails.User;
 
 public class ExtendedUser extends User {
 
-    private String fullName;
+	private Integer userId;
+	private String email;
+	private String fullName;
 
-    public ExtendedUser(String username, String password, Collection<? extends GrantedAuthority> authorities, String familyName, String firstName) {
-        super(username, password, authorities);
+	public ExtendedUser(Integer userId, String email, String password, Collection<? extends GrantedAuthority> authorities, String familyName, String firstName) {
+		super(email, password, authorities);
 
-        this.fullName = familyName + firstName;
-    }
+		this.userId = userId;
+		this.email = email;
+		this.fullName = familyName + firstName;
+	}
 
-    public String getFullName() {
-        return fullName;
-    }
+	public Integer getUserId() {
+		return userId;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public String getFullName() {
+		return fullName;
+	}
 
 }

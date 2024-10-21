@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout1}">
+
+<head>
+</head>
+
+<body>
+  <!-- サイドバー -->
+  <aside layout:fragment="sidebar" class="col-md-3 bg-light p-3" style="height: 100vh;">
+    <h2 class="font-monospace">MyList</h2>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <h5 class="mt-2">今日が期日の個人タスク</h5>
+            <!-- personalPastDueTasks が null でない場合にのみ表示 -->
+            <th:block th:if="${personalTodayDueTasks != null and !#lists.isEmpty(personalTodayDueTasks)}">
+              <ul th:each="task : ${personalTodayDueTasks}" class="list-group mt-3">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <!-- タスクタイトルを表示 -->
+                  <div style="width: 232px;">
+                    <p class="mb-1">タスク名: <span th:text="${task.title}"></span></p>
+                    <!-- 優先度を表示 -->
+                    <p class="mb-1">優先度:
+                      <span class="badge"
+                        th:classappend="|bg-${task.priority.getDisplayValue() == '高' ? 'danger' : (task.priority.getDisplayValue() == '中' ? 'warning' : 'info')}|"
+                        th:text="${task.priority.getDisplayValue()}">
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
+                      style="display:inline;">
+                      <button type="submit" class="btn btn-sm btn-secondary">完了</button>
+                      <!-- currentUri の値を hidden フィールドとして設定 -->
+                      <input type="hidden" th:value="*{currentUri}" name="currentUri">
+                    </form>
+                  </div>
+                </li>
+              </ul>
+            </th:block>
+            <th:block
+              th:unless="${personalTodayDueTasks != null and !#lists.isEmpty(personalTodayDueTasks)}">
+              <div class="alert alert-secondary mt-3" role="alert">
+                今日が期日のタスクはありません。
+              </div>
+            </th:block>
+          </li>
+
+          <li class="list-group-item mt-3">
+            <h5 class="mt-2">今日が期日のプロジェクトタスク</h5>
+            <!-- personalPastDueTasks が null でない場合にのみ表示 -->
+            <th:block th:if="${projectTodayDueTasks != null and !#lists.isEmpty(projectTodayDueTasks)}">
+              <ul th:each="task : ${projectTodayDueTasks}" class="list-group mt-3">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <!-- タスクタイトルを表示 -->
+                  <div style="width: 232px;">
+                    <p class="mb-1">プロジェクト名: <span th:text="${task.project.title}"></span></p>
+                    <p class="mb-1">タスク名: <span th:text="${task.title}"></span></p>
+                    <!-- 優先度を表示 -->
+                    <p class="mb-1">優先度:
+                      <span class="badge"
+                        th:classappend="|bg-${task.priority.getDisplayValue() == '高' ? 'danger' : (task.priority.getDisplayValue() == '中' ? 'warning' : 'info')}|"
+                        th:text="${task.priority.getDisplayValue()}">
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <form th:action="@{/update/completed/project-task/{id}(id=${task.id})}"
+                      method="post" style="display:inline;">
+                      <button type="submit" class="btn btn-sm btn-secondary">完了</button>
+                      <!-- currentUri の値を hidden フィールドとして設定 -->
+                      <input type="hidden" th:value="*{currentUri}" name="currentUri">
+                    </form>
+                  </div>
+                </li>
+              </ul>
+            </th:block>
+            <th:block th:unless="${projectTodayDueTasks != null and !#lists.isEmpty(projectTodayDueTasks)}">
+              <div class="alert alert-secondary mt-3" role="alert">
+                今日が期日のタスクはありません。
+              </div>
+            </th:block>
+          </li>
+        </ul>
+  </aside>
+</body>
+
+</html>

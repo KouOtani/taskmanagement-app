@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout1}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>通知</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <!-- Bootstrap JS -->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+</head>
+
+<body>
+  <!-- メインコンテンツ -->
+  <div layout:fragment="content">
+      <div class="d-flex align-items-center mb-4">
+        <h2 class="mb-0">通知</h2>
+      </div>
+
+      <!-- 通知リスト -->
+      <div class="notification-list mb-4">
+        <th:block th:each="notification : ${notifications}">
+          <div class="card shadow-sm mb-3 border-0">
+            <div class="card-body">
+              <th:block th:if="${notification != null}">
+
+                <!-- 招待通知の場合 -->
+                <th:block th:if="${notification.type == 'INVITATION'}">
+                  <h5 class="card-title mb-2"
+                    th:text="'プロジェクト : 「' + ${notification.object.projectTitle} + '」への招待'">
+                  </h5>
+                  <p class="text-muted small mb-2"
+                    th:text="'招待日: ' + ${#dates.format(notification.object.invitationDate, 'yyyy/MM/dd HH:mm:ss')}">
+                  </p>
+                  <p class="mb-1 text-primary" th:text="'招待者: ' + ${notification.object.inviterName}">
+                  </p>
+                  <p class="mb-2 text-secondary" th:text="${notification.object.projectDescription}">
+                  </p>
+                  <div class="d-flex gap-2">
+                    <th:block th:if="${notification.object.status.name() == 'PENDING'}">
+                      <form method="post"
+                        th:action="@{'/notifications/' + ${notification.object.id} + '/response'}">
+                        <input type="hidden" name="response" value="accept">
+                        <button class="btn btn-success" type="submit">
+                          <i class="bi bi-check-lg"></i> 承認する
+                        </button>
+                      </form>
+                      <form method="post"
+                        th:action="@{'/notifications/' + ${notification.object.id} + '/response'}">
+                        <input type="hidden" name="response" value="reject">
+                        <button class="btn btn-danger" type="submit">
+                          <i class="bi bi-x-lg"></i> 拒否する
+                        </button>
+                      </form>
+                    </th:block>
+
+                    <!-- 承認/拒否後のメッセージ -->
+                    <th:block th:if="${notification.object.status.name() == 'ACCEPTED'}">
+                      <div class="alert alert-success m-0 p-2" role="alert">
+                        <span>プロジェクトへの招待を承認しました。</span>
+                      </div>
+                    </th:block>
+
+                    <th:block th:if="${notification.object.status.name() == 'REJECTED'}">
+                      <div class="alert alert-danger m-0 p-2" role="alert">
+                        <span>プロジェクトへの招待を拒否しました。</span>
+                      </div>
+                    </th:block>
+                  </div>
+                </th:block>
+
+                <!-- コメント通知の場合 -->
+                <th:block th:if="${notification.type == 'COMMENT'}">
+                  <h5 class="card-title mb-2">新しいコメントがありました</h5>
+                  <p class="text-muted small mb-2"
+                    th:text="'投稿日: ' + ${#dates.format(notification.object.notificationDate, 'yyyy/MM/dd HH:mm:ss')}">
+                  </p>
+                  <p class="mb-1 text-primary"
+                    th:text="'投稿者: ' + ${notification.object.commenterName}"></p>
+                  <p class="mb-1" th:text="'プロジェクト名: ' + ${notification.object.projectTitle}">
+                  </p>
+                  <p class="mb-2 text-secondary" th:text="${notification.object.commentContent}"></p>
+                  <a class="btn btn-primary mt-2"
+                    th:href="@{'/project/chat/' + ${notification.object.projectId}}">
+                    <i class="bi bi-chat-dots"></i> 確認
+                  </a>
+                </th:block>
+
+                <!-- リアクション通知の場合 -->
+                <th:block th:if="${notification.type == 'REACTION'}">
+                  <h5 class="card-title mb-2">あなたのコメントにリアクションがありました</h5>
+                  <p class="text-muted small mb-2"
+                    th:text="'リアクション日時: ' + ${#dates.format(notification.object.notificationDate, 'yyyy/MM/dd HH:mm:ss')}">
+                  </p>
+                  <p class="mb-1 text-primary"
+                    th:text="'リアクションしたユーザー: ' + ${notification.object.reactorName}"></p>
+                  <p class="mb-1" th:text="'プロジェクト名: ' + ${notification.object.projectName}">
+                  </p>
+                  <p class="mb-2 text-secondary"
+                    th:text="'コメント内容: ' + ${notification.object.commentContent}"></p>
+                  <a class="btn btn-primary mt-2"
+                    th:href="@{'/project/chat/' + ${notification.object.projectId}}">
+                    <i class="bi bi-chat-dots"></i> 確認
+                  </a>
+                </th:block>
+              </th:block>
+            </div>
+          </div>
+        </th:block>
+      </div>
+    </div>
+</body>
+
+</html>

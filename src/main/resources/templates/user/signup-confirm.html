@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title th:text="#{signup}"></title>
+  <!--CSS読み込み-->
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <!--JS読み込み-->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}" defer></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light pt-3">
+    <div class="container-fluid">
+      <span class="navbar-brand text-dark" th:text="#{app_name}"></span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="row mt-3">
+      <div class="col-sm-4"></div>
+      <div class="col-sm-4 alert alert-primary text-center mb-0">
+        下記内容で登録します。<br>
+        よろしいですか？
+      </div>
+      <div class="col-sm-4"></div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <form th:action="@{/user/signup}" method="post" class="form-signup mx-auto" style="max-width: 500px;"
+      th:object="${signupForm}">
+      <!-- 名前（familyName）と名前（firstName）を横並びにする -->
+      <div class="mb-3">
+        <div class="row">
+          <!-- 名前（familyName） -->
+          <div class="col-md-6 mb-3 mb-md-0">
+            <h1 th:text="#{familyName}" class="h5 fw-bold"></h1>
+            <input type="hidden" class="form-control" th:field="*{familyName}" />
+            <p th:text="*{familyName}"></p>
+          </div>
+          <!-- 名前（firstName） -->
+          <div class="col-md-6">
+            <h1 th:text="#{firstName}" class="h5 fw-bold"></h1>
+            <input type="hidden" class="form-control" th:field="*{firstName}" />
+            <p th:text="*{firstName}"></p>
+          </div>
+        </div>
+      </div>
+      <!--メールアドレス-->
+      <div class="mb-3">
+        <h1 th:text="#{email}" class="h5 fw-bold"></h1>
+        <input type="hidden" class="form-control" th:field="*{email}" />
+        <p th:text="*{email}"></p>
+      </div>
+      <!--パスワード-->
+      <div class="mb-3">
+        <h1 th:text="#{password}" class="h5 fw-bold"></h1>
+        <input type="hidden" class="form-control" th:field="*{password}" />
+        <p th:text="*{password}"></p>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-primary mt-3 w-50" type="submit">新規登録</button>
+      </div>
+    </form>
+  </div>
+
+</body>
+
+</html>

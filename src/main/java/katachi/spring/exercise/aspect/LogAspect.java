@@ -15,45 +15,45 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LogAspect {
 
-    /*サービスの実行前にログ出力する。
-    対象[UserService]をクラス名に含んでいる。*/
+	/*サービスの実行前にログ出力する。
+	対象[Service]をクラス名に含んでいる。*/
 
-    @Before("execution(* *..*.*UserService.*(..))")
-    public void startLog(JoinPoint jp) {
-        log.info("メソッド開始：" + jp.getSignature());
-    }
+	@Before("execution(* *..*.*Service.*(..))")
+	public void startLog(JoinPoint jp) {
+		log.info("メソッド開始：" + jp.getSignature());
+	}
 
-    /*サービスの実行後にログ出力する。
-    対象[UserService]をクラス名に含んでいる。*/
+	/*サービスの実行後にログ出力する。
+	対象[Service]をクラス名に含んでいる。*/
 
-    @After("execution(* *..*.*UserService.*(..))")
-    public void endLog(JoinPoint jp) {
-        log.info("メソッド終了：" + jp.getSignature());
-    }
+	@After("execution(* *..*.*Service.*(..))")
+	public void endLog(JoinPoint jp) {
+		log.info("メソッド終了：" + jp.getSignature());
+	}
 
-    /*コントローラーの実行前後にログを出力する*/
-    @Around("@within(org.springframework.stereotype.Controller)")
-    public Object startLog(ProceedingJoinPoint jp) throws Throwable {
+	/*コントローラーの実行前後にログを出力する*/
+	@Around("@within(org.springframework.stereotype.Controller)")
+	public Object startLog(ProceedingJoinPoint jp) throws Throwable {
 
-        //開始ログ出力
-        log.info("メソッド開始：" + jp.getSignature());
+		//開始ログ出力
+		log.info("メソッド開始：" + jp.getSignature());
 
-        try {
-            //メソッド実行
-            Object result = jp.proceed();
+		try {
+			//メソッド実行
+			Object result = jp.proceed();
 
-            //終了ログ実行
-            log.info("メソッド終了：" + jp.getSignature());
+			//終了ログ実行
+			log.info("メソッド終了：" + jp.getSignature());
 
-            //実行結果を呼び出し元に返却
-            return result;
+			//実行結果を呼び出し元に返却
+			return result;
 
-        } catch (Exception e) {
-            //エラーログ出力
-            log.error("メソッド異常終了：" + jp.getSignature());
+		} catch (Exception e) {
+			//エラーログ出力
+			log.error("メソッド異常終了：" + jp.getSignature());
 
-            //エラーの再スロー
-            throw e;
-        }
-    }
+			//エラーの再スロー
+			throw e;
+		}
+	}
 }

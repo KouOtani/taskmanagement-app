@@ -1,78 +1,76 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layout/layout}">
+  layout:decorate="~{layout/layout2}">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title th:text="#{todoEntry}"></title>
-  <!--CSS読み込み-->
+  <title>個人タスクを作成</title>
+  <!-- Bootstrap CSS -->
   <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
-  <link rel="stylesheet" th:href="@{/css/login/style.css}">
-  <!--JS読み込み-->
-  <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}" defer></script>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <!-- Bootstrap JS -->
+  <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
 </head>
 
 <body>
-  <!-- コンテナ -->
   <div layout:fragment="content">
-
-    <div class="container">
-      <div class="row my-2">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-6 alert alert-info text-center">
-          作業を登録してください
-        </div>
-        <div class="col-sm-3"></div>
+    <h2 class="mb-4">個人タスクを追加</h2>
+    <form th:action="@{/entry/personal-task}" method="post" th:object="${taskRegistrationForm}">
+      <!-- タスク名 -->
+      <div class="mb-3">
+        <label for="title" class="form-label">タスク名</label>
+        <input type="text" class="form-control" th:field="*{title}" th:errorclass="is-invalid"
+          placeholder="タスク名を入力してください" />
+        <div class="invalid-feedback" th:errors="*{title}"></div>
       </div>
-    </div>
 
-    <!-- 入力フォーム -->
-    <div class="align-items-center my-2">
-      <form th:action="@{/todo/entry}" method="post" class="container form-input" th:object="${entryForm}">
-        <!--項目名-->
-        <div class="form-group mb-3">
-          <label class="form-label" for="itemName" th:text="#{itemName}"></label>
-          <input type="text" class="form-control" th:field="*{itemName}" th:errorclass="is-invalid"
-            placeholder="登録内容をここに入力してください" />
-          <div class="invalid-feedback" th:errors="*{itemName}"></div>
-        </div>
-        <!--担当者-->
-        <div class="form-group mb-3">
-          <label class="form-label" for="userId" th:text="#{manager}"></label>
-          <select class="form-control" th:field="*{userId}" th:errorclass="is-invalid">
-            <option value="" selected disabled>選択してください</option>
-            <option th:each="item : ${managerList}" th:value="${item.id}"
-              th:text="${item.familyName + item.firstName}" id="userId">
-            </option>
-          </select>
-          <div class="text-danger" th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}">
-          </div>
-        </div>
-        <!--期限-->
-        <div class="form-group mb-3">
-          <label class="form-label" for="expireDate" th:text="#{expireDate}"></label>
-          <input type="date" class="form-control" th:field="*{expireDate}" th:errorclass="is-invalid" />
-          <div class="invalid-feedback" th:errors="*{expireDate}"></div>
-        </div>
-        <!--完了チェック-->
-        <div class="form-group form-check mb-3">
-          <input type="checkbox" class="form-check-input" th:field="*{isFinished}" />
-          <label class="form-label" for="isFinished" th:text="#{isFinished}"></label>
-        </div>
+      <!-- タスクの説明 -->
+      <div class="mb-3">
+        <label for="description" class="form-label">タスクの説明</label>
+        <textarea class="form-control" th:field="*{description}" rows="4" th:errorclass="is-invalid"
+          placeholder="タスクの説明を入力してください" /></textarea>
+        <div class="invalid-feedback" th:errors="*{description}"></div>
+      </div>
 
-        <button class="btn btn-primary" type="submit" th:text="#{registration}">
-        </button>
-        <a th:href="@{/todo/list}" th:text="#{cancel}" class="btn btn-outline-primary"></a>
+      <!-- タスクの期限 -->
+      <div class="mb-3 w-50">
+        <label for="dueDate" class="form-label">期限</label>
+        <input type="date" class="form-control" th:field="*{dueDate}" th:errorclass="is-invalid">
+        <div class="invalid-feedback" th:errors="*{dueDate}"></div>
+      </div>
 
-      </form>
-    </div>
+      <!-- ステータス -->
+      <div class="mb-3 w-50">
+        <label for="status" class="form-label">ステータス</label>
+        <select class="form-select" th:field="*{status}">
+          <option th:each="status : ${status}" th:value="${status.name()}" th:text="${status.displayValue}">
+          </option>
+        </select>
+      </div>
+
+      <!-- 優先度 -->
+      <div class="mb-3 w-50">
+        <label for="priority" class="form-label">優先度</label>
+        <select class="form-select" th:field="*{priority}">
+          <option th:each="priority : ${priorities}" th:value="${priority.name()}"
+            th:text="${priority.displayValue}"></option>
+        </select>
+      </div>
+
+      <!-- タグ -->
+      <div class="mb-3">
+        <label for="name" class="form-label">タグ</label>
+        <input type="text" class="form-control" th:field="*{name}" th:errorclass="is-invalid"
+          placeholder="タグをカンマで区切って入力">
+        <div class="invalid-feedback" th:errors="*{name}"></div>
+        <small class="form-text text-muted">複数のタグがある場合、カンマまたはスペースで区切って入力してください。</small>
+      </div>
+
+      <button type="submit" class="btn btn-primary">タスクを作成</button>
+      <a href="#" class="btn btn-secondary" th:href="@{/home}">キャンセル</a>
+    </form>
   </div>
-  <!-- 入力フォーム ここまで -->
-
-  </div>
-
-  <!-- コンテナ ここまで -->
 
 </body>
 

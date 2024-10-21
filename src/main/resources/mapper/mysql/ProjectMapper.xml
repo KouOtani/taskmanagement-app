@@ -1,0 +1,810 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Mapperとxmlのマッピング -->
+<mapper
+  namespace="katachi.spring.exercise.repository.ProjectMapper">
+
+  <!-- マッピング定義(ユーザー) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.MUser" id="user">
+    <id column="id" property="id" />
+    <result column="email" property="email" />
+    <result column="password" property="password" />
+    <result column="family_name" property="familyName" />
+    <result column="first_name" property="firstName" />
+    <result column="is_admin" property="isAdmin" />
+    <result column="is_deleted" property="isDeleted" />
+  </resultMap>
+
+  <!-- マッピング定義(タスク) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.Task" id="task">
+    <id column="id" property="id" />
+    <result column="project_id" property="projectId" />
+    <result column="title" property="title" />
+    <result column="description" property="description" />
+    <result column="status" property="status" />
+    <result column="priority" property="priority" />
+    <result column="due_date" property="dueDate" />
+    <result column="registration_date" property="registrationDate" />
+    <result column="assignee_id" property="assigneeId" />
+    <result column="assignee_name" property="assigneeName" />
+    <collection property="tagsList" resultMap="tag"
+      columnPrefix="tag_" />
+    <collection property="project" resultMap="project"
+      columnPrefix="project_" />
+    <collection property="user" resultMap="user"
+      columnPrefix="user_" />
+  </resultMap>
+
+  <!-- マッピング定義(プロジェクト) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.Project" id="project">
+    <id column="id" property="id" />
+    <result column="title" property="title" />
+    <result column="description" property="description" />
+    <result column="status" property="status" />
+    <result column="leader_id" property="leaderId" />
+    <result column="due_date" property="dueDate" />
+    <result column="registration_date" property="registrationDate" />
+    <result property="leaderName" column="leader_name" />
+    <collection property="tagsList" resultMap="tag"
+      columnPrefix="tag_" />
+    <collection property="projectMembersList"
+      resultMap="projectMember" columnPrefix="projectMember_" />
+  </resultMap>
+
+  <!-- マッピング定義(タグ) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.Tag" id="tag">
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+  </resultMap>
+
+  <!-- マッピング定義(タスクタグ) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.TaskTag" id="taskTag">
+    <id column="id" property="id" />
+    <result column="task_id" property="taskId" />
+    <result column="tag_id" property="tagId" />
+  </resultMap>
+
+  <!-- マッピング定義(プロジェクトタグ) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.ProjectTag"
+    id="projectTag">
+    <id column="id" property="id" />
+    <result column="project_id" property="projectId" />
+    <result column="tag_id" property="tagId" />
+  </resultMap>
+
+  <!-- マッピング定義(アサイン) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.AssignedTo"
+    id="assignedTo">
+    <id column="id" property="id" />
+    <result column="task_id" property="taskId" />
+    <result column="user_id" property="userId" />
+    <result column="team_id" property="teamId" />
+  </resultMap>
+
+  <!-- マッピング定義(プロジェクトメンバー) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.ProjectMember"
+    id="projectMember">
+    <id column="id" property="id" />
+    <result column="project_id" property="projectId" />
+    <result column="user_id" property="userId" />
+    <result column="role" property="role" />
+    <result column="member_name" property="memberName" />
+  </resultMap>
+
+  <!-- マッピング定義(コメント) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.Comment" id="comment">
+    <id column="id" property="id" />
+    <result column="project_id" property="projectId" />
+    <result column="user_id" property="userId" />
+    <result column="content" property="content" />
+    <result column="created_at" property="createdAt" />
+    <result column="updated_at" property="updatedAt" />
+    <result column="reactor_count" property="reactorCount" />
+    <collection property="user" resultMap="user"
+      columnPrefix="user_" />
+    <collection property="reactors" resultMap="reactors"
+      columnPrefix="reactors_" />
+  </resultMap>
+
+  <!-- マッピング定義(コメントリアクション) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.CommentReaction"
+    id="reactors">
+    <id column="id" property="id" />
+    <result column="comment_id" property="commentId" />
+    <result column="user_id" property="userId" />
+    <result column="family_name" property="familyName" />
+    <result column="first_name" property="firstName" />
+    <result column="reacted_at" property="reactedAt" />
+  </resultMap>
+
+  <!-- プロジェクトを登録 -->
+  <insert id="insertProject" useGeneratedKeys="true"
+    keyProperty="id">
+    insert into project(
+    title,
+    description,
+    status,
+    due_date,
+    leader_id
+    )
+    values(
+    #{title},
+    #{description},
+    #{status},
+    #{dueDate},
+    #{leaderId}
+    )
+  </insert>
+
+  <!-- プロジェクトタグ登録 -->
+  <insert id="insertProjectTag" useGeneratedKeys="true"
+    keyProperty="id">
+    insert into project_tag(
+    project_id,
+    tag_id
+    )
+    values(
+    #{projectId},
+    #{tagId}
+    )
+  </insert>
+
+  <!-- プロジェクトメンバーを登録 -->
+  <insert id="addProjectMember">
+    insert into project_member(
+    project_id,
+    user_id,
+    role
+    )
+    values(
+    #{projectId},
+    #{userId},
+    #{role}
+    )
+  </insert>
+
+  <!-- プロジェクトとタグのリストを取得するクエリ -->
+  <select id="findAllProjects" resultMap="project">
+    SELECT
+    p.id AS id,
+    p.title,
+    p.description,
+    p.status,
+    p.due_date,
+    p.leader_id,
+    CONCAT(mu_leader.family_name, ' ', mu_leader.first_name) AS leader_name,
+    t.id AS tag_id,
+    t.name AS tag_name,
+    pm.user_id AS projectMember_user_id,
+    CONCAT(mu_member.family_name, ' ', mu_member.first_name) AS projectMember_member_name,
+    mu_member.email AS member_email,
+    pm.id AS projectMember_id,
+    pm.role AS projectMember_role
+    FROM
+    project p
+    JOIN
+    project_member pm ON p.id = pm.project_id
+    LEFT JOIN
+    project_tag pt ON p.id = pt.project_id
+    LEFT JOIN
+    tag t ON pt.tag_id = t.id
+    LEFT JOIN
+    m_users mu_leader ON p.leader_id = mu_leader.id
+    LEFT JOIN
+    m_users mu_member ON pm.user_id = mu_member.id
+    WHERE
+    p.id IN (
+    SELECT DISTINCT
+    pm_sub.project_id
+    FROM
+    project_member pm_sub
+    WHERE
+    pm_sub.user_id = #{userId}
+    )
+
+    <if test="tagName != null and tagName != ''">
+      AND p.id IN (
+      SELECT p.id
+      FROM project p
+      JOIN project_tag pt ON p.id = pt.project_id
+      JOIN tag ON pt.tag_id = tag.id
+      WHERE tag.name = #{tagName}
+      )
+    </if>
+
+    <!-- 検索クエリの追加 -->
+    <if test="searchQuery != null and searchQuery != ''">
+      AND p.title LIKE CONCAT('%', #{searchQuery}, '%')
+    </if>
+
+    <!-- ステータスによるフィルタリング -->
+    <if test="status != null">
+      AND p.status = #{status}
+    </if>
+
+    <!-- リーダーIDによるフィルタリング -->
+    <if test="leaderId != null">
+      AND p.leader_id = #{leaderId}
+    </if>
+
+    <!-- 期日の昇順をデフォルトに設定 -->
+    ORDER BY
+    p.due_date
+    <choose>
+      <when test="dueDateOrder == 'desc'">
+        DESC
+      </when>
+      <otherwise>
+        ASC
+      </otherwise>
+    </choose>
+  </select>
+
+
+  <select id="findLeadersByUserId" resultMap="project">
+    SELECT DISTINCT
+    p.leader_id,
+    CONCAT(mu_leader.family_name, ' ', mu_leader.first_name) AS leader_name
+    FROM
+    project p
+    LEFT JOIN
+    project_member pm ON p.id = pm.project_id
+    LEFT JOIN
+    m_users mu_leader ON p.leader_id = mu_leader.id
+    WHERE
+    pm.user_id = #{userId}
+  </select>
+
+  <!-- 完了済みタスクの数を取得 -->
+  <select id="countCompletedTasksByProjectId" resultType="int">
+    SELECT COUNT(*) FROM task WHERE project_id = #{projectId} AND status =
+    'COMPLETED'
+  </select>
+
+  <!-- プロジェクト全体のタスク数を取得 -->
+  <select id="countAllTasksByProjectId" resultType="int">
+    SELECT COUNT(*) FROM task WHERE project_id = #{projectId}
+  </select>
+
+  <!-- プロジェクト詳細を取得(1件) --> <!-- 招待画面を表示 -->
+  <select id="findOneProjectForInvitationById" resultMap="project">
+    SELECT
+    p.id,
+    p.title,
+    p.description,
+    p.status,
+    p.leader_id,
+    p.due_date,
+    CONCAT(mu.family_name, ' ', mu.first_name) AS leader_name
+    FROM
+    project p
+    LEFT JOIN
+    m_users mu
+    ON
+    p.leader_id = mu.id
+    WHERE
+    p.id = #{projectId}
+  </select>
+
+  <!-- プロジェクト詳細を取得(1件) --> <!-- 編集画面を表示 -->
+  <select id="findOneProjectForEditingById" resultMap="project">
+    select
+    p.id,
+    p.title,
+    p.description,
+    p.status,
+    p.due_date,
+    tag.id as tag_id,
+    tag.name as tag_name
+    from
+    project p
+    left join
+    project_tag pt on p.id = pt.project_id
+    left join
+    tag on pt.tag_id = tag.id
+    where
+    p.id = #{projectId}
+  </select>
+
+  <!-- プロジェクト情報を更新 -->
+  <update id="updateProject">
+    UPDATE project
+    SET
+    title = #{title},
+    description = #{description},
+    status = #{status},
+    due_date = #{dueDate}
+    WHERE id = #{id}
+  </update>
+
+  <!-- プロジェクトに関連付けられたタグを削除 -->
+  <delete id="deleteByProjectId">
+    DELETE FROM project_tag
+    WHERE
+    project_id = #{projectId}
+  </delete>
+
+  <!-- プロジェクトを削除 -->
+  <delete id="deleteProject">
+    DELETE
+    FROM
+    project
+    WHERE
+    id = #{projectId}
+  </delete>
+
+  <!-- プロジェクトのメンバーを取得 -->
+  <select id="findMembersByProjectId" resultMap="projectMember">
+    SELECT
+    pm.id,
+    pm.project_id,
+    pm.user_id,
+    CONCAT(mu.family_name, ' ', mu.first_name) AS member_name,
+    pm.role
+    FROM
+    project_member pm
+    JOIN
+    m_users mu ON pm.user_id = mu.id
+    WHERE
+    pm.project_id = #{projectId}
+  </select>
+
+  <!-- プロジェクトのメンバーに、指定したメールアドレスのユーザーが含まれているかを確認 -->
+  <select id="isMemberOfProjectByEmail" resultType="int">
+    SELECT COUNT(*)
+    FROM project_member pm
+    JOIN m_users u ON pm.user_id = u.id
+    WHERE pm.project_id = #{projectId}
+    AND u.email = #{email}
+  </select>
+
+  <!-- 招待が存在し、まだ未承諾（保留中）の状態かを、メールアドレスで確認 -->
+  <select id="isUserAlreadyInvitedByEmail" resultType="int">
+    SELECT COUNT(*)
+    FROM invitation i
+    JOIN m_users u ON i.invitee_id = u.id
+    WHERE i.project_id = #{projectId}
+    AND u.email = #{email}
+    AND i.status = 'PENDING'
+  </select>
+
+  <!-- ユーザーの通知リストを取得するクエリ -->
+  <select id="findInvitationsByUserId" resultType="Invitation">
+    SELECT
+    i.id AS id,
+    i.inviter_id AS inviterId,
+    i.invitee_id AS inviteeId,
+    i.project_id AS projectId,
+    i.status AS status,
+    i.created_at AS invitationDate,<!-- 招待日と時刻を取得 -->
+    p.title AS projectTitle,
+    p.description AS projectDescription,
+    CONCAT(mu.family_name, ' ', mu.first_name) AS inviterName
+    FROM invitation i
+    JOIN project p ON i.project_id = p.id
+    JOIN m_users mu ON i.inviter_id = mu.id
+    WHERE i.invitee_id = #{userId}
+
+  </select>
+
+  <!-- Invitationテーブルに招待情報をインサート -->
+  <insert id="insertInvitation">
+    INSERT INTO Invitation (
+    inviter_id,
+    invitee_id,
+    project_id,
+    status
+    )
+    VALUES (
+    #{inviterId},
+    #{inviteeId},
+    #{projectId},
+    #{status}
+    )
+  </insert>
+
+  <!-- 招待の詳細を取得 -->
+  <select id="findInvitationDetailsById" resultType="Invitation">
+    SELECT * FROM Invitation
+    WHERE
+    id = #{invitationId}
+  </select>
+
+  <!-- 招待状のステータスを更新する -->
+  <update id="updateInvitationStatus">
+    UPDATE Invitation
+    SET status = #{status}
+    WHERE id = #{invitationId}
+  </update>
+
+  <!-- 招待の数を取得する -->
+  <select id="countPendingInvitations" resultType="int">
+    SELECT COUNT(*)
+    FROM invitation
+    WHERE invitee_id = #{userId}
+    AND status = 'PENDING'
+  </select>
+
+  <!-- プロジェクトタスク複数件取得 -->
+  <select id="findManyTasksByProjectId" resultMap="task">
+    SELECT
+    t.id,
+    t.title,
+    t.description,
+    t.status,
+    t.priority,
+    t.due_date,
+    t.registration_date,
+    p.id AS project_id,
+    p.title AS project_title,
+    mu.id AS user_id,
+    mu.family_name AS user_family_name,
+    mu.first_name AS user_first_name
+    FROM
+    task t
+    LEFT JOIN
+    assigned_to at ON t.id = at.task_id
+    LEFT JOIN
+    m_users mu ON at.user_id = mu.id <!-- assigned_to テーブルと user テーブルを結合 -->
+    LEFT JOIN
+    project p ON t.project_id = p.id <!-- project テーブルと結合 -->
+    WHERE
+    t.project_id = #{projectId} <!-- project_id に関連するタスクに絞る -->
+    <choose>
+      <when test="completed == true">
+        AND t.status = 'COMPLETED'
+      </when>
+      <otherwise>
+        AND t.status IN ('NOT_STARTED', 'IN_PROGRESS')
+      </otherwise>
+    </choose>
+    <if test="searchQuery != null and searchQuery != ''">
+      AND t.title LIKE CONCAT('%', #{searchQuery}, '%')
+    </if>
+    <if test="status != null">
+      AND t.status = #{status}
+    </if>
+    <if test="priority != null">
+      AND t.priority = #{priority}
+    </if>
+    <if test="userId != null">
+      AND at.user_id = #{userId} <!-- メンバーIDでタスクを絞る条件 -->
+    </if>
+    <!-- 期日の昇順をデフォルトに設定 -->
+    ORDER BY t.due_date
+    <choose>
+      <when test="dueDateOrder == 'desc'">
+        DESC
+      </when>
+      <otherwise>
+        ASC
+      </otherwise>
+    </choose>
+  </select>
+
+  <!-- プロジェクトタスク1件取得 -->
+  <select id="findProjectTaskOneByTaskId" resultMap="task">
+    select
+    t.id,
+    t.title,
+    t.description,
+    t.status,
+    t.priority,
+    t.due_date,
+    t.registration_date,
+    p.id as project_id,
+    p.title as project_title,
+    at.user_id as user_id
+    from
+    task t
+    left join
+    project p on t.project_id = p.id
+    left join
+    assigned_to at on t.id = at.task_id
+    where
+    t.id = #{taskId}
+  </select>
+
+  <!-- プロジェクトタスク情報を更新 -->
+  <update id="updateProjectTask">
+    UPDATE task
+    SET
+    title = #{title},
+    description = #{description},
+    status = #{status},
+    priority = #{priority},
+    due_date = #{dueDate}
+    WHERE id = #{id}
+  </update>
+
+  <!-- プロジェクトタスク情報を更新 -->
+  <update id="updateAssignee">
+    UPDATE assigned_to
+    SET user_id = #{assigneeId}
+    WHERE task_id = #{task.id}
+  </update>
+
+  <!-- コメントを取得する -->
+  <select id="getCommentsByProjectId" resultMap="comment">
+    SELECT
+    c.*,
+    u.family_name AS user_family_name,
+    u.first_name AS user_first_name,
+    (SELECT COUNT(cr2.user_id)
+    FROM comment_reaction cr2
+    WHERE cr2.comment_id = c.id) AS reactor_count,
+    u2.family_name AS reactors_family_name,
+    u2.first_name AS reactors_first_name
+    FROM comment c
+    JOIN m_users u ON c.user_id = u.id
+    LEFT JOIN comment_reaction cr ON c.id = cr.comment_id
+    LEFT JOIN m_users u2 ON cr.user_id = u2.id
+    WHERE c.project_id = #{projectId}
+    ORDER BY c.created_at ASC
+  </select>
+
+  <!-- コメントを保存する -->
+  <insert id="insertComment" useGeneratedKeys="true"
+    keyProperty="id">
+    INSERT INTO Comment (
+    project_id,
+    user_id,
+    content
+    )
+    VALUES (
+    #{projectId},
+    #{userId},
+    #{content}
+    )
+  </insert>
+
+  <!-- コメントの更新 -->
+  <update id="updateComment">
+    UPDATE comment
+    SET content = #{content}
+    WHERE id = #{commentId}
+  </update>
+
+  <!-- コメントIDによる取得 -->
+  <select id="getCommentById" resultType="Comment">
+    SELECT * FROM comment WHERE id = #{commentId}
+  </select>
+
+  <delete id="deleteCommentById">
+    DELETE FROM comment WHERE id = #{commentId}
+  </delete>
+
+  <!-- リアクションを追加 -->
+  <insert id="addReaction">
+    INSERT INTO comment_reaction (
+    comment_id,
+    user_id
+    )
+    VALUES (
+    #{commentId},
+    #{userId}
+    )
+  </insert>
+
+  <!-- リアクションを削除 -->
+  <delete id="removeReaction">
+    DELETE FROM
+    comment_reaction
+    WHERE
+    comment_id = #{commentId}
+    AND
+    user_id = #{userId}
+  </delete>
+
+  <!-- ユーザーがリアクションしたかを確認 -->
+  <select id="checkIfUserReacted" resultType="boolean">
+    SELECT
+    COUNT(*) > 0
+    FROM
+    comment_reaction
+    WHERE
+    comment_id = #{commentId}
+    AND
+    user_id = #{userId}
+  </select>
+
+  <!-- プロジェクト内の他のメンバーを取得 -->
+  <select id="getOtherMembers" resultType="int">
+    SELECT user_id
+    FROM project_member
+    WHERE project_id = #{projectId}
+    AND user_id != #{commentingUserId}
+  </select>
+
+  <!-- 通知の挿入 -->
+  <insert id="insertCommentNotification">
+    INSERT INTO comment_notification (
+    comment_id,
+    user_id
+    )
+    VALUES (
+    #{commentId},
+    #{userId}
+    )
+  </insert>
+
+  <!-- コメント通知の取得（プロジェクト名、コメント内容、投稿者を含む） -->
+  <select id="getCommentNotificationsByUserId"
+    resultType="CommentNotification">
+    SELECT
+    cn.id AS id,
+    cn.comment_id,
+    cn.user_id AS recipient_user_id,
+    cn.created_at AS notification_date,
+    c.content AS comment_content,
+    c.project_id,
+    p.title AS project_title,
+    CONCAT(u.family_name, ' ', u.first_name) AS commenter_name
+    FROM
+    comment_notification cn
+    JOIN
+    comment c ON cn.comment_id = c.id
+    JOIN
+    project p ON c.project_id = p.id
+    JOIN
+    m_users u ON c.user_id = u.id
+    WHERE
+    cn.user_id = #{userId}
+
+  </select>
+
+  <!-- コメント通知の削除 -->
+  <delete id="deleteCommentNotificationsByProjectIdAndUserId">
+    DELETE FROM comment_notification
+    WHERE user_id = #{userId}
+    AND comment_id IN (
+    SELECT id FROM comment
+    WHERE project_id = #{projectId}
+    )
+  </delete>
+
+  <!-- 未読コメント数を取得する -->
+  <select id="countUnreadComments" resultType="int">
+    SELECT COUNT(*)
+    FROM comment_notification
+    WHERE user_id = #{userId}
+  </select>
+
+  <!-- リアクション通知を挿入 -->
+  <insert id="insertCommentReactionNotification">
+    INSERT INTO comment_reaction_notification (
+    comment_id,
+    reactor_id
+    )
+    VALUES (
+    #{commentId},
+    #{reactorId}
+    )
+  </insert>
+
+  <!-- リアクション通知の取得（プロジェクト名、コメント内容、リアクション者を含む） -->
+  <select id="getReactionNotificationsByUserId"
+    resultType="CommentReactionNotification">
+    SELECT
+    crn.id,
+    crn.comment_id AS commentId,
+    crn.reactor_id AS reactorId,
+    crn.created_at AS notificationDate,
+    CONCAT(u.family_name, ' ', u.first_name) AS reactorName,
+    c.content AS commentContent,
+    p.title AS projectName,
+    p.id AS projectId
+    FROM
+    comment_reaction_notification crn
+    INNER JOIN
+    comment c ON crn.comment_id = c.id
+    INNER JOIN
+    project p ON c.project_id = p.id
+    INNER JOIN
+    m_users u ON crn.reactor_id = u.id
+    WHERE
+    c.user_id = #{userId}
+
+  </select>
+
+  <!-- リアクション通知の削除 -->
+  <delete id="deleteReactionNotificationsByProjectIdAndUserId">
+    DELETE FROM comment_reaction_notification
+    WHERE comment_id IN (
+    SELECT c.id
+    FROM comment c
+    INNER JOIN project p ON c.project_id = p.id
+    WHERE c.user_id = #{userId}
+    AND p.id = #{projectId}
+    )
+  </delete>
+
+  <!-- 未確認リアクション数を取得する -->
+  <select id="countUnconfirmedReactions" resultType="int">
+    SELECT COUNT(*)
+    FROM comment_reaction_notification crn
+    INNER JOIN comment c ON crn.comment_id = c.id
+    WHERE c.user_id = #{userId}
+  </select>
+
+  <select id="findProjectPastDueTasks" resultMap="task">
+    SELECT
+    t.id,
+    t.title,
+    t.due_date,
+    p.id AS project_id,
+    p.title AS project_title
+    FROM
+    task t
+    LEFT JOIN
+    assigned_to at ON t.id = at.task_id
+    LEFT JOIN
+    project p ON t.project_id = p.id  <!-- プロジェクトを結合 -->
+    WHERE
+    at.user_id = #{userId}
+    AND t.project_id IS NOT NULL  <!-- 全てのプロジェクトタスクを対象 -->
+    AND CURDATE() > t.due_date
+    AND t.status != 'COMPLETED'
+    ORDER BY
+    t.due_date DESC
+  </select>
+
+  <select id="findProjectTodayDueTasks" resultMap="task">
+    SELECT
+    t.id,
+    t.title,
+    t.due_date,
+    t.priority,
+    p.id AS project_id,
+    p.title AS project_title
+    FROM
+    task t
+    LEFT JOIN
+    assigned_to at ON t.id = at.task_id
+    LEFT JOIN
+    project p ON t.project_id = p.id  <!-- プロジェクトを結合 -->
+    WHERE
+    at.user_id = #{userId}
+    AND t.project_id IS NOT NULL  <!-- 全てのプロジェクトタスクを対象 -->
+    AND CURDATE() = t.due_date
+    AND t.status != 'COMPLETED'
+    ORDER BY
+    t.due_date
+  </select>
+
+  <select id="findProjectDueOneWeekTasks" resultMap="task">
+    SELECT
+    t.id,
+    t.title,
+    t.due_date,
+    p.id AS project_id,
+    p.title AS project_title
+    FROM
+    task t
+    LEFT JOIN
+    assigned_to at ON t.id = at.task_id
+    LEFT JOIN
+    project p ON t.project_id = p.id  <!-- プロジェクトを結合 -->
+    WHERE
+    at.user_id = #{userId}
+    AND t.project_id IS NOT NULL  <!-- 全てのプロジェクトタスクを対象 -->
+    AND t.due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7
+    DAY)
+    AND t.status != 'COMPLETED'
+    ORDER BY
+    t.due_date ASC
+  </select>
+
+</mapper>

@@ -1,16 +1,28 @@
 @charset "UTF-8";
 
-/* ボタンを横並びにする */
-form {
-  display: inline-block;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* 打消し線を入れる */
-tr.del>td {
-  text-decoration: line-through;
+
+body {
+  min-height: 100vh;
+  margin: 0 auto;
+  font-family: "Helvetica Neue",
+    "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans",
+    Arial,
+    Meiryo,
+    sans-serif;
 }
 
-/* ボタンのセルは打消し線を入れない */
-tr.del>td.button {
-  text-decoration: none;
+.form-login,
+.form-input {
+  width: 100%;
+  max-width: 500px;
+  padding: 15px;
+  margin: auto;
 }
+

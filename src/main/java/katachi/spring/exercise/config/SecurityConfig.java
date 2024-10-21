@@ -18,48 +18,50 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 @EnableMethodSecurity // このアノテーションはこのアプリでは書かなくてよい
 public class SecurityConfig {
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
-    @Bean
-    MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
-        return new MvcRequestMatcher.Builder(introspector);
-    }
+	@Bean
+	MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
+		return new MvcRequestMatcher.Builder(introspector);
+	}
 
-    /*セキュリティの各種設定*/
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
+	/*セキュリティの各種設定*/
+	@Bean
+	SecurityFilterChain securityFilterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
 
-        //ログイン不要ページの設定
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //直リンクOK
-                .requestMatchers(mvc.pattern("/user/signup")).permitAll() //直リンクOK
-                .requestMatchers(mvc.pattern("/user/signup/rest")).permitAll() //直リンクOK
-                .requestMatchers(mvc.pattern("/admin")).hasAuthority("ROLE_ADMIN") //権限制御
-                .anyRequest().authenticated()); //それ以外は直リンクNG
+		//ログイン不要ページの設定
+		http.authorizeHttpRequests(authorize -> authorize
+				.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //直リンクOK
+				.requestMatchers(mvc.pattern("/user/signup")).permitAll() //直リンクOK
+				.requestMatchers(mvc.pattern("/user/signup-confirm")).permitAll() //直リンクOK
+				.requestMatchers(mvc.pattern("/user/signup/rest")).permitAll() //直リンクOK
+				.requestMatchers(mvc.pattern("/admin")).hasAuthority("ROLE_ADMIN") //権限制御
+				.anyRequest().authenticated()); //それ以外は直リンクNG
 
-        //ログイン処理
-        http.formLogin(login -> login
-                .loginProcessingUrl("/login") //ログイン処理のパス
-                .loginPage("/login") //ログインページの指定
-                .failureUrl("/login?error") //ログイン失敗時の遷移先
-                .usernameParameter("userId") //ログインページのユーザーID
-                .passwordParameter("password") //ログインページのパスワード
-                .defaultSuccessUrl("/todo/list", true) //成功時の遷移先
-                .permitAll());
+		//ログイン処理
+		http.formLogin(login -> login
+				.loginProcessingUrl("/login") //ログイン処理のパス
+				.loginPage("/login") //ログインページの指定
+				.failureUrl("/login?error") //ログイン失敗時の遷移先
+				.usernameParameter("email") //ログインページのユーザーID
+				.passwordParameter("password") //ログインページのパスワード
+				.defaultSuccessUrl("/home", true) //成功時の遷移先
+				.permitAll());
 
-        //ログアウト処理
-        http.logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-                .permitAll());
+		// ログアウト処理の設定
+		http.logout(logout -> logout
+				.logoutUrl("/logout")
+				.logoutSuccessUrl("/login?logout")
+				.invalidateHttpSession(true)
+				.permitAll());
 
-        http.headers(headers -> headers
-                .frameOptions(FrameOptionsConfig::disable));
+		http.headers(headers -> headers
+				.frameOptions(FrameOptionsConfig::disable));
 
-        return http.build();
-    }
+		return http.build();
+	}
 
 }
