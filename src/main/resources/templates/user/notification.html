@@ -83,7 +83,7 @@
                     th:text="'投稿者: ' + ${notification.object.commenterName}"></p>
                   <p class="mb-1" th:text="'プロジェクト名: ' + ${notification.object.projectTitle}">
                   </p>
-                  <p class="mb-2 text-secondary" th:text="${notification.object.commentContent}"></p>
+                  <p class="mb-2 text-secondary" th:text="'コメント: ' + ${notification.object.commentContent}"></p>
                   <a class="btn btn-primary mt-2"
                     th:href="@{'/project/chat/' + ${notification.object.projectId}}">
                     <i class="bi bi-chat-dots"></i> 確認

@@ -64,7 +64,7 @@
                   <!-- ダウンロードリンクの生成 -->
                   <!--                  <a th:href="@{/download/{fileName}(fileName=${attachment.fileName})}"-->
                   <!--                    th:text="${attachment.fileName}"></a>-->
-                  <form th:action="@{/download}" method="post">
+                  <form th:action="@{/download}" method="post" onsubmit="return confirm('添付ファイルをダウンロードしますか？');">
                     <input type="hidden" name="attachmentId" th:value="${attachment.id}" />
                     <button class="btn btn-link p-0" type="submit"
                       th:text="${attachment.fileName}"></button>
