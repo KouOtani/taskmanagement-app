@@ -1,12 +1,18 @@
 package katachi.spring.exercise.domain.user.service.Impl;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import katachi.spring.exercise.domain.user.model.Comment;
+import katachi.spring.exercise.domain.user.model.CommentAttachment;
 import katachi.spring.exercise.domain.user.model.CommentNotification;
 import katachi.spring.exercise.domain.user.model.CommentReactionNotification;
 import katachi.spring.exercise.domain.user.model.Invitation;
@@ -218,13 +224,13 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectMapper.findProjectTaskOneByTaskId(taskId);
 	}
 
-	/*プロジェクト内のコメントを取得*/
+	/*プロジェクトチャット内のコメントを取得*/
 	@Override
 	public List<Comment> getCommentsByProjectId(Integer projectId) {
 		return projectMapper.getCommentsByProjectId(projectId);
 	}
 
-	/*プロジェクト内のコメントを保存*/
+	/*プロジェクトチャット内のコメントを保存*/
 	@Override
 	public Integer saveComment(Integer projectId, Integer userId, String content) {
 		Comment comment = new Comment();
@@ -239,10 +245,42 @@ public class ProjectServiceImpl implements ProjectService {
 		return comment.getId();
 	}
 
-	/*プロジェクト内のコメントを更新*/
+	/*プロジェクトチャット内のコメントを更新*/
 	@Override
 	public void updateComment(Integer commentId, String content) {
 		projectMapper.updateComment(commentId, content);
+	}
+
+	/*プロジェクトチャットのファイルを保存*/
+	@Override
+	public void saveAttachments(Integer commentId, MultipartFile[] attachments) throws IOException {
+		// プロジェクトのルートディレクトリからのパス
+		String uploadDir = "C:/pleiades/2023-09/workspace/SpringTaskManagement/uploads/comments"; // ファイルを保存するディレクトリ
+
+		for (MultipartFile file : attachments) {
+			if (!file.isEmpty()) {
+				String originalFileName = file.getOriginalFilename();
+				String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName; // 一意なファイル名
+
+				// ファイル保存先のパスを作成
+				Path filePath = Paths.get(uploadDir, uniqueFileName);
+
+				// ファイルを保存
+				Files.copy(file.getInputStream(), filePath);
+
+				// CommentAttachmentエンティティを作成し、DBに保存
+				CommentAttachment attachment = new CommentAttachment();
+				attachment.setCommentId(commentId);
+				attachment.setFilePath(uniqueFileName);
+				attachment.setFileName(originalFileName);
+				projectMapper.saveCommentAttachment(attachment);
+			}
+		}
+	}
+
+	/*ファイルの情報を取得する*/
+	public CommentAttachment getCommentAttachmentById(Integer attachmentId) {
+		return projectMapper.findCommentAttachmentById(attachmentId); // DBからデータを取得
 	}
 
 	/*対象のコメントを取得*/

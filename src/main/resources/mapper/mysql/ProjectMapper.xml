@@ -115,6 +115,19 @@
       columnPrefix="user_" />
     <collection property="reactors" resultMap="reactors"
       columnPrefix="reactors_" />
+    <collection property="attachments" resultMap="attachment"
+      columnPrefix="attachments_" />
+  </resultMap>
+
+  <!-- マッピング定義(コメント添付ファイル) -->
+  <resultMap
+    type="katachi.spring.exercise.domain.user.model.CommentAttachment"
+    id="attachment">
+    <id column="id" property="id" />
+    <result column="comment_id" property="commentId" />
+    <result column="file_path" property="filePath" />
+    <result column="file_name" property="fileName" />
+    <result column="uploaded_at" property="uploadedAt" />
   </resultMap>
 
   <!-- マッピング定義(コメントリアクション) -->
@@ -546,11 +559,15 @@
     FROM comment_reaction cr2
     WHERE cr2.comment_id = c.id) AS reactor_count,
     u2.family_name AS reactors_family_name,
-    u2.first_name AS reactors_first_name
+    u2.first_name AS reactors_first_name,
+    ca.id AS attachments_id,
+    ca.file_name AS attachments_file_name,
+    ca.file_path AS attachments_file_path
     FROM comment c
     JOIN m_users u ON c.user_id = u.id
     LEFT JOIN comment_reaction cr ON c.id = cr.comment_id
     LEFT JOIN m_users u2 ON cr.user_id = u2.id
+    LEFT JOIN comment_attachment ca ON c.id = ca.comment_id
     WHERE c.project_id = #{projectId}
     ORDER BY c.created_at ASC
   </select>
@@ -577,11 +594,30 @@
     WHERE id = #{commentId}
   </update>
 
-  <!-- コメントIDによる取得 -->
+  <!-- プロジェクトチャットのファイルを保存 -->
+  <update id="saveCommentAttachment">
+    INSERT INTO comment_attachment (
+    comment_id,
+    file_path,
+    file_name
+    )
+    VALUES (
+    #{commentId},
+    #{filePath},
+    #{fileName}
+    )
+  </update>
+
+  <select id="findCommentAttachmentById" resultType="CommentAttachment">
+    SELECT * FROM comment_attachment WHERE id = #{attachmentId}
+  </select>
+
+  <!-- コメントIDによるコメント取得 -->
   <select id="getCommentById" resultType="Comment">
     SELECT * FROM comment WHERE id = #{commentId}
   </select>
 
+  <!-- コメントIDによるコメント削除 -->
   <delete id="deleteCommentById">
     DELETE FROM comment WHERE id = #{commentId}
   </delete>
@@ -662,7 +698,6 @@
     m_users u ON c.user_id = u.id
     WHERE
     cn.user_id = #{userId}
-
   </select>
 
   <!-- コメント通知の削除 -->

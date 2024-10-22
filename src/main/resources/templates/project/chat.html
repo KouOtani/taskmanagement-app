@@ -55,6 +55,24 @@
               </button>
             </form>
 
+            <!-- 添付ファイルの表示 -->
+            <div th:if="${comment.attachments.size() > 0}" class="d-flex">
+              <h6 class="m-0">添付ファイル:</h6>
+              <ul class="ps-1 m-0">
+                <!-- コメントに添付されたファイルごとにループ -->
+                <li th:each="attachment : ${comment.attachments}" style="list-style: none;">
+                  <!-- ダウンロードリンクの生成 -->
+                  <!--                  <a th:href="@{/download/{fileName}(fileName=${attachment.fileName})}"-->
+                  <!--                    th:text="${attachment.fileName}"></a>-->
+                  <form th:action="@{/download}" method="post">
+                    <input type="hidden" name="attachmentId" th:value="${attachment.id}" />
+                    <button class="btn btn-link p-0" type="submit"
+                      th:text="${attachment.fileName}"></button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+
             <!-- 自分のコメントのみ編集ボタンを表示 -->
             <div th:if="${comment.userId} == ${session.userId}">
               <!-- 編集ボタン -->
@@ -68,14 +86,13 @@
                   style="border: none; background: none;">削除</button>
               </form>
             </div>
-
           </div>
         </div>
 
         <h5 class="my-2" th:if="${editComment != null}">コメントを編集</h5>
         <h5 class="my-2" th:if="${editComment == null}">新しいコメントを投稿</h5>
 
-        <form th:action="@{/project/comments}" method="post">
+        <form th:action="@{/project/comments}" method="post" enctype="multipart/form-data">
           <input type="hidden" name="projectId" th:value="${projectId}" />
           <input type="hidden" name="userId" th:value="${session.userId}" />
           <input type="hidden" name="commentId"
@@ -84,6 +101,13 @@
             <textarea id="edit" name="content" class="form-control" rows="3" placeholder="コメントを入力..."
               required th:text="${editComment != null} ? ${editComment.content} : ''"></textarea>
           </div>
+          <!-- ファイル添付 -->
+          <div class="form-group d-flex mt-2">
+            <label for="attachments" class="form-label">ファイルを添付</label>
+            <input class="form-control form-control-sm w-50 ms-3" type="file" name="attachments"
+              id="attachments" multiple>
+          </div>
+
           <button type="submit" class="btn btn-primary mt-2">
             <span th:text="${editComment != null ? '編集を保存' : '投稿'}"></span>
           </button>

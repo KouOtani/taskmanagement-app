@@ -1,8 +1,12 @@
 package katachi.spring.exercise.domain.user.service;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import katachi.spring.exercise.domain.user.model.Comment;
+import katachi.spring.exercise.domain.user.model.CommentAttachment;
 import katachi.spring.exercise.domain.user.model.CommentNotification;
 import katachi.spring.exercise.domain.user.model.CommentReactionNotification;
 import katachi.spring.exercise.domain.user.model.Invitation;
@@ -94,14 +98,20 @@ public interface ProjectService {
 	/*プロジェクトタスクを取得(１件)*/
 	public Task getProjectTaskOneByTaskId(Integer taskId);
 
-	/*プロジェクト内のコメントを取得*/
+	/*プロジェクチャットト内のコメントを取得*/
 	public List<Comment> getCommentsByProjectId(Integer projectId);
 
-	/*プロジェクト内のコメントを保存*/
+	/*プロジェクトチャット内のコメントを保存*/
 	public Integer saveComment(Integer projectId, Integer userId, String content);
 
-	/*プロジェクト内のコメントを更新*/
+	/*プロジェクトチャット内のコメントを更新*/
 	public void updateComment(Integer commentId, String content);
+
+	/*プロジェクトチャット内のファイルを保存*/
+	public void saveAttachments(Integer commentId, MultipartFile[] attachments) throws IOException;
+
+	/*ファイルの情報を取得する*/
+	public CommentAttachment getCommentAttachmentById(Integer attachmentId);
 
 	/*対象のコメントを取得*/
 	public Comment getCommentById(Integer commentId);

@@ -20,6 +20,7 @@ public class Comment {
 	private Integer reactorCount; // リアクションしたユーザーの合計数
 	private boolean hasReacted; // 現在のユーザーがリアクションしているかどうか
 	private List<CommentReaction> reactors; //コメントにリアクションをしたユーザーのリスト
+	private List<CommentAttachment> attachments; //コメントに添付したファイルのリスト
 
 	// リアクションしたユーザーのフルネームを改行で取得
 	public String getReactorsFullNames() {

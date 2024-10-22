@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import katachi.spring.exercise.domain.user.model.Comment;
+import katachi.spring.exercise.domain.user.model.CommentAttachment;
 import katachi.spring.exercise.domain.user.model.CommentNotification;
 import katachi.spring.exercise.domain.user.model.CommentReactionNotification;
 import katachi.spring.exercise.domain.user.model.Invitation;
@@ -105,15 +106,21 @@ public interface ProjectMapper {
 	/*プロジェクトタスクを取得(１件)*/
 	public Task findProjectTaskOneByTaskId(@Param("taskId") Integer taskId);
 
-	/*プロジェクト内のコメントを取得*/
+	/*プロジェクトチャット内のコメントを取得*/
 	List<Comment> getCommentsByProjectId(Integer projectId);
 
-	/*プロジェクト内のコメントを保存*/
+	/*プロジェクトチャット内のコメントを保存*/
 	public void insertComment(Comment comment);
 
-	/*プロジェクト内のコメントを更新*/
+	/*プロジェクトチャット内のコメントを更新*/
 	public void updateComment(@Param("commentId") Integer commentId,
 			@Param("content") String content);
+
+	/*プロジェクトチャットのファイルを保存*/
+	public void saveCommentAttachment(CommentAttachment attachment);
+
+	/*ファイルの情報を取得する*/
+	public CommentAttachment findCommentAttachmentById(@Param("attachmentId") Integer attachmentId);
 
 	/*コメントIDでコメントを取得*/
 	public Comment getCommentById(@Param("commentId") Integer commentId);

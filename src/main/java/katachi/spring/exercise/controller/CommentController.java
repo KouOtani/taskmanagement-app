@@ -1,5 +1,6 @@
 package katachi.spring.exercise.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -88,14 +90,24 @@ public class CommentController {
 	public String postOrUpdateComment(@RequestParam("projectId") Integer projectId,
 			@RequestParam("userId") Integer userId,
 			@RequestParam("content") String content,
-			@RequestParam(required = false) Integer commentId) {
+			@RequestParam(required = false) Integer commentId,
+			@RequestParam("attachments") MultipartFile[] attachments) throws IOException {
 
 		if (commentId != null) {
 			// コメントを更新
 			projectService.updateComment(commentId, content);
+			// 添付ファイルの処理
+			if (attachments != null && attachments.length > 0) {
+				projectService.saveAttachments(commentId, attachments);
+			}
 		} else {
 			// 新しいコメントを保存し、生成されたコメントIDを取得
 			Integer newCommentId = projectService.saveComment(projectId, userId, content);
+
+			// 添付ファイルの処理
+			if (attachments != null && attachments.length > 0) {
+				projectService.saveAttachments(newCommentId, attachments);
+			}
 
 			// 通知を作成 (コメントをしたユーザー以外のプロジェクトメンバーに通知を送信)
 			projectService.createCommentNotifications(newCommentId, projectId, userId);
