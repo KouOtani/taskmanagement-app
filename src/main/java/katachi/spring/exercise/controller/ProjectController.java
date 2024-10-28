@@ -55,7 +55,7 @@ public class ProjectController {
 		// 現在のユーザー情報を取得
 		ExtendedUser userDetails = applicationService.getCurrentUserDetails();
 
-		// 今日期日の個人タスクを取得 処理をまとめるように検討する
+		// 今日期日の個人タスクを取得
 		List<Task> personalTodayDueTasks = userService.getPersonalDueTodayTasks(userDetails.getUserId());
 
 		// 今日期日のプロジェクトタスクを取得

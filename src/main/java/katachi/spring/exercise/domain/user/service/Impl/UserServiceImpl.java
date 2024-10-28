@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
 		//パスワード暗号化
 		String rawPassword = user.getPassword();
 		user.setPassword(encoder.encode(rawPassword));
-
+		user.setIsAdmin(0);
 		mapper.insertUser(user);
 	}
 

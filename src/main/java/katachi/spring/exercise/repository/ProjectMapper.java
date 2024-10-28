@@ -15,6 +15,7 @@ import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.Project.ProjectStatus;
 import katachi.spring.exercise.domain.user.model.ProjectMember;
 import katachi.spring.exercise.domain.user.model.ProjectTag;
+import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
 import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
@@ -48,6 +49,9 @@ public interface ProjectMapper {
 	/*プロジェクト全体のタスク数を取得*/
 	public Integer countAllTasksByProjectId(@Param("projectId") Integer projectId);
 
+	/*Projectテーブルの情報を取得*/
+	public Project findProjectByProjectId(@Param("projectId") Integer projectId);
+
 	/*プロジェクトを検索(１件)*/ //招待画面を表示
 	public Project findOneProjectForInvitationById(@Param("projectId") Integer projectId);
 
@@ -73,7 +77,7 @@ public interface ProjectMapper {
 	public Integer isUserAlreadyInvitedByEmail(@Param("projectId") Integer projectId, @Param("email") String email);
 
 	/*ユーザーの通知リストを取得するメソッド*/
-	List<Invitation> findInvitationsByUserId(@Param("userId") Integer userId);
+	public List<Invitation> findInvitationsByUserId(@Param("userId") Integer userId);
 
 	/*Invitationテーブルに招待情報をインサートするメソッド*/
 	public int insertInvitation(Invitation invitation);
@@ -106,8 +110,11 @@ public interface ProjectMapper {
 	/*プロジェクトタスクを取得(１件)*/
 	public Task findProjectTaskOneByTaskId(@Param("taskId") Integer taskId);
 
+	/*プロジェクトタスク追加の通知を作成*/
+	public void insertProjectTaskNotification(ProjectTaskNotification notification);
+
 	/*プロジェクトチャット内のコメントを取得*/
-	List<Comment> getCommentsByProjectId(Integer projectId);
+	public List<Comment> getCommentsByProjectId(Integer projectId);
 
 	/*プロジェクトチャット内のコメントを保存*/
 	public void insertComment(Comment comment);
@@ -141,15 +148,15 @@ public interface ProjectMapper {
 			@Param("userId") Integer userId);
 
 	/*他のメンバーを取得するメソッド*/
-	List<Integer> getOtherMembers(@Param("projectId") Integer projectId, @Param("commentingUserId") Integer commentingUserId);
+	public List<Integer> getOtherMembers(@Param("projectId") Integer projectId, @Param("commentingUserId") Integer commentingUserId);
 
 	/*通知を挿入するメソッド*/
 	public void insertCommentNotification(@Param("commentId") Integer commentId, @Param("userId") Integer userId);
 
 	/*ユーザーIDに基づいてコメント通知を取得するメソッド*/
-	List<CommentNotification> getCommentNotificationsByUserId(@Param("userId") Integer userId);
+	public List<CommentNotification> getCommentNotificationsByUserId(@Param("userId") Integer userId);
 
-	/*ユーザーIDに基づいてコメント通知を削除するメソッド*/
+	/*ユーザーIDとプロジェクトIDに基づいてコメント通知を削除するメソッド*/
 	public void deleteCommentNotificationsByProjectIdAndUserId(@Param("userId") Integer userId,
 			@Param("projectId") Integer projectId);
 
@@ -160,14 +167,24 @@ public interface ProjectMapper {
 	public void insertCommentReactionNotification(CommentReactionNotification notification);
 
 	/*ユーザーIDに基づいてリアクション通知を取得するメソッド*/
-	List<CommentReactionNotification> getReactionNotificationsByUserId(@Param("userId") Integer userId);
+	public List<CommentReactionNotification> getReactionNotificationsByUserId(@Param("userId") Integer userId);
 
-	/*ユーザーIDに基づいてリアクション通知を削除するメソッド*/
+	/*ユーザーIDとプロジェクトIDに基づいてリアクション通知を削除するメソッド*/
 	public void deleteReactionNotificationsByProjectIdAndUserId(@Param("userId") Integer userId,
 			@Param("projectId") Integer projectId);
 
 	/*未確認リアクションの数を取得するメソッド*/
 	public Integer countUnconfirmedReactions(@Param("userId") Integer userId);
+
+	/*プロジェクトタスクを振られた際の通知を取得するメソッド*/
+	public List<ProjectTaskNotification> getProjectTaskNotificationsByUserId(@Param("userId") Integer userId);
+
+	/*ユーザーIDとプロジェクトIDに基づいてプロジェクトタスク通知を削除するメソッド*/
+	public void deleteProjectTaskNotificationsByProjectIdAndUserId(@Param("userId") Integer userId,
+			@Param("projectId") Integer projectId);
+
+	/*未確認プロジェクトタスクの数を取得するメソッド*/
+	public Integer countUnconfirmedProjectTasks(@Param("userId") Integer userId);
 
 	/*期限が過ぎたプロジェクトタスクを複数件取得*/
 	public List<Task> findProjectPastDueTasks(Integer userId);

@@ -13,7 +13,6 @@
     <result column="password" property="password" />
     <result column="family_name" property="familyName" />
     <result column="first_name" property="firstName" />
-    <result column="full_name" property="fullName" />
     <result column="is_admin" property="isAdmin" />
     <result column="is_deleted" property="isDeleted" />
   </resultMap>
@@ -83,11 +82,9 @@
     password,
     family_name,
     first_name,
-    CONCAT(family_name, ' ', first_name) AS full_name,
     is_admin
     from m_users
     where email = #{email}
-
   </select>
 
   <!-- メールアドレス重複チェック -->

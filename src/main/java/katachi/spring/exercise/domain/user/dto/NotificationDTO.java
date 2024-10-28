@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class NotificationDTO {
 
-	private String type; // "INVITATION" または "COMMENT" または "REACTION"
+	private String type; // "INVITATION" または "COMMENT" または "REACTION" または "TASK_ASSIGNMENT"
 	private Object object; // 具体的な通知情報を保持する
 	private Date createdAt; // 作成日時
 

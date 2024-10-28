@@ -54,8 +54,11 @@ public class SessionAspect {
 		// ユーザーの未確認リアクション通知数を取得
 		int unconfirmedReactions = projectService.countUnconfirmedReactionsForUser(userId);
 
-		// 未処理の招待数、未読コメント通知数、未確認リアクション通知数を合計
-		int totalNotifications = pendingInvitations + unreadComments + unconfirmedReactions;
+		// ユーザーの未確認プロジェクトタスク通知数を取得
+		int unconfirmedProjectTasks = projectService.countUnconfirmedProjectTasksForUser(userId);
+
+		// 未処理の招待数、未読コメント通知数、未確認リアクション通知数、未確認プロジェクトタスク通知数を合計
+		int totalNotifications = pendingInvitations + unreadComments + unconfirmedReactions + unconfirmedProjectTasks;
 
 		// セッションに通知の総数を保存
 		session.setAttribute("totalNotifications", totalNotifications);

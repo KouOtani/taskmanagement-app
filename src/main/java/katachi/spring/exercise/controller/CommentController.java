@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpSession;
 import katachi.spring.exercise.application.service.UserApplicationService;
 import katachi.spring.exercise.domain.user.model.Comment;
 import katachi.spring.exercise.domain.user.model.ExtendedUser;
+import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.service.ProjectService;
 
 @Controller
@@ -64,6 +65,9 @@ public class CommentController {
 		// プロジェクトに基づいたリアクションの通知を削除
 		projectService.clearReactionNotifications(userId, projectId);
 
+		// projectIdからプロジェクトの情報を取得
+		Project project = projectService.getProjectByProjectId(projectId);
+
 		// ユーザーの未処理の招待数を取得
 		int pendingInvitations = projectService.countPendingInvitationsForUser(userId);
 
@@ -73,16 +77,21 @@ public class CommentController {
 		// ユーザーの未確認リアクション通知数を取得
 		int unconfirmedReactions = projectService.countUnconfirmedReactionsForUser(userId);
 
-		// 未処理の招待数と未読コメント通知数を合計
-		int totalNotifications = pendingInvitations + unreadComments + unconfirmedReactions;
+		// ユーザーの未確認プロジェクトタスク通知数を取得
+		int unconfirmedProjectTasks = projectService.countUnconfirmedProjectTasksForUser(userId);
+
+		// 未処理の招待数、未読コメント通知数、未確認リアクション通知数、未確認プロジェクトタスク通知数を合計
+		int totalNotifications = pendingInvitations + unreadComments + unconfirmedReactions + unconfirmedProjectTasks;
 
 		// セッションに通知の総数を保存
 		session.setAttribute("totalNotifications", totalNotifications);
 
+		model.addAttribute("project", project); // プロジェクト情報をモデルに追加
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("comments", comments);
 
 		return "project/chat";
+
 	}
 
 	// コメントの投稿および更新処理
@@ -122,11 +131,17 @@ public class CommentController {
 			Model model) {
 
 		Comment comment = projectService.getCommentById(commentId);
+
 		List<Comment> comments = projectService.getCommentsByProjectId(projectId);
+
+		// projectIdからプロジェクトの情報を取得
+		Project project = projectService.getProjectByProjectId(projectId);
 
 		model.addAttribute("editComment", comment); // 編集対象のコメント
 		model.addAttribute("comments", comments); // コメント一覧
 		model.addAttribute("projectId", projectId); // プロジェクトID
+		model.addAttribute("project", project); // プロジェクト情報をモデルに追加
+
 		return "project/chat"; // チャットページに戻る
 	}
 

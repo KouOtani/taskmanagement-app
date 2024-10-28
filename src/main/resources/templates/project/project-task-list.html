@@ -18,7 +18,7 @@
   <!-- メインコンテンツ -->
   <div layout:fragment="content">
     <div class="d-flex align-items-center mb-4">
-      <h2 class="mb-0">プロジェクト内タスク</h2>
+      <h2 class="mb-0" th:text="${project.title}"></h2>
       <a class="btn btn-sm btn-outline-primary ms-4"
         th:href="@{'/entry/project-task/' + ${projectId}}">プロジェクトタスクを追加</a>
     </div>
@@ -66,16 +66,18 @@
             </select>
           </div>
 
-          <div class="me-4">
-            <label for="status" class="form-label">ステータス:</label>
-            <select id="status" class="form-select" name="status" onchange="submitFilterForm()">
-              <option value="">すべて</option>
-              <option th:each="statusItem : ${statusList}" th:value="${statusItem.name()}"
-                th:text="${statusItem.displayValue}"
-                th:selected="${status != null and status.name() == statusItem.name()}">
-              </option>
-            </select>
-          </div>
+          <th:block th:if="${completed == null}">
+            <div class="me-4">
+              <label for="status" class="form-label">ステータス:</label>
+              <select id="status" class="form-select" name="status" onchange="submitFilterForm()">
+                <option value="">すべて</option>
+                <option th:each="statusItem : ${statusList}" th:value="${statusItem.name()}"
+                  th:text="${statusItem.displayValue}"
+                  th:selected="${status != null and status.name() == statusItem.name()}">
+                </option>
+              </select>
+            </div>
+          </th:block>
 
           <div class="me-4">
             <label for="priority" class="form-label">優先度:</label>
@@ -124,10 +126,11 @@
     <ul class="list-group mt-4">
       <!-- タスクアイテム -->
       <li th:each="task : ${projectTasksList}"
-        class="list-group-item d-flex justify-content-between align-items-center">
+        class="list-group-item d-flex justify-content-between align-items-center py-3">
         <div style="width: 900px;">
           <!-- 締め切り日を過ぎたタスクのメッセージ -->
-          <p th:if="${task.dueDate < currentDate}" class="text-danger fw-bold fs-5 my-2">
+          <p th:if="${task.dueDate != null and task.dueDate.isBefore(currentDate) and (queryString == null or !queryString.contains('completed=true'))}"
+            class="text-danger fw-bold fs-5 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
               class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
               <path
@@ -138,7 +141,7 @@
           <!-- 一週間前のタスクのメッセージ -->
           <p th:if="${task.dueDate != null
               and (task.dueDate.isBefore(oneWeekFromNow)
-                   and task.dueDate.isAfter(currentDate))}" class="text-primary fw-bold fs-5 my-2">
+                   and task.dueDate.isAfter(currentDate))}" class="text-primary fw-bold fs-5 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
               class="bi bi-exclamation-diamond-fill" viewBox="0 0 16 16">
               <path
@@ -149,7 +152,7 @@
 
           <!-- 期日当日のタスクのメッセージ -->
           <p th:if="${task.dueDate != null
-              and task.dueDate.isEqual(currentDate)}" class="text-warning fw-bold fs-5 my-2">
+              and task.dueDate.isEqual(currentDate)}" class="text-warning fw-bold fs-5 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
               class="bi bi-exclamation-circle-fill" viewBox="0 0 16 16">
               <path
@@ -183,8 +186,8 @@
 
         <div>
           <!-- アクションボタン -->
-          <th:block
-            th:if="${currentUri.startsWith('/project-task') and (queryString == null or !queryString.contains('completed=true'))}">
+          <th:block th:if="${(currentUri.startsWith('/project-task') and (queryString == null or !queryString.contains('completed=true')))
+           and (project.leaderId == currentUserId or task.user.id == currentUserId)}">
             <a class="btn btn-sm btn-primary" th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
             <a class="btn btn-sm btn-danger" th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
             <form th:action="@{/update/completed/project-task/{id}(id=${task.id})}" method="post"
@@ -195,12 +198,17 @@
               <input type="hidden" th:value="${task.projectId}" name="projectId">
             </form>
           </th:block>
-          <th:block th:if="${currentUri.startsWith('/project-task') and queryString == 'completed=true'}">
+
+          <!-- 完了タスクの未完了に戻すボタン -->
+          <th:block th:if="${(currentUri.startsWith('/project-task') and queryString == 'completed=true')
+                   and (project.leaderId == currentUserId or task.user.id == currentUserId)}">
             <form th:action="@{/update/undo/project-task/{id}(id=${task.id})}" method="post"
               style="display:inline;">
               <input type="hidden" th:value="${task.projectId}" name="projectId">
               <button type="submit" class="btn btn-sm btn-secondary">未完了タスクに戻す</button>
             </form>
+          </th:block>
+
         </div>
       </li>
     </ul>

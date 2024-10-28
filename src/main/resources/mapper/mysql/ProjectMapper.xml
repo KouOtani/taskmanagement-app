@@ -265,7 +265,6 @@
     </choose>
   </select>
 
-
   <select id="findLeadersByUserId" resultMap="project">
     SELECT DISTINCT
     p.leader_id,
@@ -289,6 +288,11 @@
   <!-- プロジェクト全体のタスク数を取得 -->
   <select id="countAllTasksByProjectId" resultType="int">
     SELECT COUNT(*) FROM task WHERE project_id = #{projectId}
+  </select>
+
+  <!-- Projectテーブルの情報を取得 -->
+  <select id="findProjectByProjectId" resultType="Project">
+    SELECT * FROM project WHERE id = #{projectId}
   </select>
 
   <!-- プロジェクト詳細を取得(1件) --> <!-- 招待画面を表示 -->
@@ -530,6 +534,22 @@
     t.id = #{taskId}
   </select>
 
+<!-- プロジェクトタスクに担当されたの通知を作成 -->
+  <insert id="insertProjectTaskNotification">
+    INSERT INTO
+    project_task_notification (
+    task_id,
+    assigner_id,
+    assignee_id
+    )
+    VALUES (
+    #{taskId},
+    #{assignerId},
+    #{assigneeId}
+    )
+  </insert>
+
+
   <!-- プロジェクトタスク情報を更新 -->
   <update id="updateProjectTask">
     UPDATE task
@@ -608,7 +628,8 @@
     )
   </update>
 
-  <select id="findCommentAttachmentById" resultType="CommentAttachment">
+  <select id="findCommentAttachmentById"
+    resultType="CommentAttachment">
     SELECT * FROM comment_attachment WHERE id = #{attachmentId}
   </select>
 
@@ -751,7 +772,6 @@
     m_users u ON crn.reactor_id = u.id
     WHERE
     c.user_id = #{userId}
-
   </select>
 
   <!-- リアクション通知の削除 -->
@@ -772,6 +792,47 @@
     FROM comment_reaction_notification crn
     INNER JOIN comment c ON crn.comment_id = c.id
     WHERE c.user_id = #{userId}
+  </select>
+
+  <!-- プロジェクトタスクを振られた通知の取得（プロジェクト名、タスク名、指名者） -->
+  <select id="getProjectTaskNotificationsByUserId"
+    resultType="ProjectTaskNotification">
+    SELECT
+        ptn.id,
+        ptn.assigner_id AS assignerId,
+        ptn.assignee_id AS assigneeId,
+        ptn.created_at AS notificationDate,
+        p.id AS projectId,
+        p.title AS projectName,
+        t.title AS taskTitle,
+        CONCAT(u.family_name, ' ', u.first_name) AS assignerName
+    FROM
+        project_task_notification ptn
+    JOIN
+        task t ON ptn.task_id = t.id
+    JOIN
+        project p ON t.project_id = p.id
+    JOIN
+        m_users u ON ptn.assigner_id = u.id
+    WHERE
+        ptn.assignee_id = #{userId}
+  </select>
+
+  <!-- プロジェクトタスク通知の削除 -->
+  <delete id="deleteProjectTaskNotificationsByProjectIdAndUserId">
+    DELETE FROM project_task_notification
+    WHERE assignee_id = #{userId}
+    AND task_id IN (
+    SELECT id FROM task
+    WHERE project_id = #{projectId}
+    )
+  </delete>
+
+  <!-- 未確認プロジェクトタスク数を取得する -->
+  <select id="countUnconfirmedProjectTasks" resultType="int">
+    SELECT COUNT(*)
+    FROM project_task_notification ptn
+    WHERE ptn.assignee_id = #{userId}
   </select>
 
   <select id="findProjectPastDueTasks" resultMap="task">

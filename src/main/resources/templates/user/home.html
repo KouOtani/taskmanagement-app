@@ -157,7 +157,7 @@
             <div class="p-2" style="width: 340px;">
               <!-- プロジェクトタイトル -->
               <h5 class="text-primary fw-bold mb-2">
-                <a th:href="@{/project}" class="text-primary text-decoration-none">
+                <a th:href="@{/project-task/{id}(id=${task.projectId})}" class="text-primary text-decoration-none">
                   「<span th:text="${task.project.title}"></span>」
                 </a>
               </h5>
@@ -198,7 +198,7 @@
     </div>
 
     <!-- 進行中のプロジェクトセクションを追加 -->
-    <div class="row mt-4">
+    <div th:if="${myProjects != null and !#lists.isEmpty(myProjects)}" class="row mt-4">
       <div class="col-md-12">
         <h4>所属プロジェクト</h4>
         <ul class="list-group">
@@ -208,7 +208,7 @@
 
             <!-- プロジェクト名をクリック可能にする -->
             <h5 class="text-primary fw-bold mb-2">
-              <a th:href="@{/project}" class="text-primary text-decoration-none">
+              <a th:href="@{/project-task/{id}(id=${project.id})}" class="text-primary text-decoration-none">
                 「<span th:text="${project.title}"></span>」
               </a>
             </h5>

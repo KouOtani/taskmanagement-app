@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>プロジェクトリスト</title>
+  <title>プロジェクト</title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
   <link rel="stylesheet" th:href="@{/css/style.css}">
@@ -23,7 +23,7 @@
         <a class="btn btn-sm btn-outline-primary ms-4" th:href="@{/entry/project}">プロジェクトを追加</a>
       </div>
 
-      <div class="d-flex justify-content-between">
+      <div th:if="${projectList != null and !#lists.isEmpty(projectList)}" class="d-flex justify-content-between">
         <form class="d-flex" role="search" th:action="@{/project}" method="get" style="width: 350px;">
           <input class="form-control me-2" type="search" placeholder="プロジェクト名で検索" aria-label="Search"
             th:value="*{searchQuery}" name="searchQuery">
@@ -139,7 +139,7 @@
                     class="text-light"></a>
                 </span>
                 <small th:if="${project.tagsList != null and !#lists.isEmpty(project.tagsList)}"
-                  class="text-muted">タグをクリックしてフィルタリング</small>
+                  class="text-muted">タグをクリックして検索</small>
                 <small
                   th:unless="${project.tagsList != null and !#lists.isEmpty(project.tagsList)}">タグ付けされていません</small>
               </p>
@@ -156,13 +156,15 @@
             <!-- カードのフッター -->
             <div class="card-footer text-end">
               <a th:href="@{/project-task/{id}(id=${project.id})}"
-                class="btn btn-outline-primary btn-sm">タスクを確認・追加</a>
+                class="btn btn-outline-primary btn-sm mt-2">タスクを確認・追加</a>
+
               <!-- メンバー招待リンク -->
               <a th:href="@{/project/invite/{id}(id=${project.id})}"
-                class="btn btn-outline-success btn-sm ms-2">メンバーを招待</a>
+                class="btn btn-outline-success btn-sm mt-2">メンバーを招待</a>
+
               <!-- メンバー招待リンク -->
               <a th:href="@{/project/chat/{id}(id=${project.id})}"
-                class="btn btn-outline-danger btn-sm mt-2 ms-2">チャット</a>
+                class="btn btn-outline-danger btn-sm mt-2">チャット</a>
             </div>
           </div>
         </div>

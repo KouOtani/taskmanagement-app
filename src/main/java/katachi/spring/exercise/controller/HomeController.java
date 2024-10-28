@@ -77,6 +77,8 @@ public class HomeController {
 		model.addAttribute("projectOneWeekDueTasks", projectOneWeekDueTasks);
 		model.addAttribute("myProjects", myProjects);
 
+		System.out.println(projectPastDueTasks);
+
 		// ホーム画面を表示
 		return "user/home";
 	}

@@ -10,7 +10,6 @@ public class MUser {
 	private String password; //ログイン時のパスワード
 	private String familyName; //ユーザーの名字
 	private String firstName; //ユーザーの名前
-	private String fullName; //ユーザーのフルネーム
 	private Integer isAdmin; //0:管理者権限なし　1:管理者権限あり
 	private Task task;
 

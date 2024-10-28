@@ -11,6 +11,7 @@ import katachi.spring.exercise.domain.user.model.AssignedTo;
 import katachi.spring.exercise.domain.user.model.ExtendedUser;
 import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.ProjectTag;
+import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
 import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.TaskTag;
@@ -119,6 +120,7 @@ public class UserApplicationService {
 	public void saveAssignedTo(Task task, @Nullable Integer assigneeId) {
 		// 現在のユーザーを取得
 		ExtendedUser userDetails = getCurrentUserDetails();
+		Integer currentUserId = userDetails.getUserId(); // 現在のユーザーIDを取得
 
 		// AssignedToオブジェクトを作成
 		AssignedTo assignedTo = new AssignedTo();
@@ -128,11 +130,20 @@ public class UserApplicationService {
 		if (assigneeId != null) {
 			assignedTo.setUserId(assigneeId);
 		} else {
-			assignedTo.setUserId(userDetails.getUserId());
+			assignedTo.setUserId(currentUserId);
 		}
 
 		// AssignedTo テーブルに保存
 		userService.saveAssignedTo(assignedTo);
+
+		// タスクが他のユーザーに振られた場合に通知を作成
+		if (assigneeId != null && !currentUserId.equals(assigneeId)) {
+			ProjectTaskNotification notification = new ProjectTaskNotification();
+			notification.setTaskId(task.getId());
+			notification.setAssignerId(currentUserId); //　招待したユーザーID
+			notification.setAssigneeId(assigneeId); //　招待されたユーザーID
+			projectService.createProjectTaskNotification(notification); // 通知を保存
+		}
 	}
 
 }

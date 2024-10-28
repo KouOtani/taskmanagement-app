@@ -21,6 +21,7 @@ import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.Project.ProjectStatus;
 import katachi.spring.exercise.domain.user.model.ProjectMember;
 import katachi.spring.exercise.domain.user.model.ProjectTag;
+import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
 import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
@@ -89,6 +90,12 @@ public class ProjectServiceImpl implements ProjectService {
 	@Override
 	public List<Project> getUniqueLeadersByUserId(Integer userId) {
 		return projectMapper.findLeadersByUserId(userId);
+	}
+
+	/*Projectテーブルの情報を取得*/
+	@Override
+	public Project getProjectByProjectId(Integer projectId) {
+		return projectMapper.findProjectByProjectId(projectId);
 	}
 
 	/*プロジェクトを検索(１件)*/ //招待画面を表示する
@@ -224,6 +231,12 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectMapper.findProjectTaskOneByTaskId(taskId);
 	}
 
+	/*プロジェクトタスク追加の通知を作成*/
+	@Override
+	public void createProjectTaskNotification(ProjectTaskNotification notification) {
+		projectMapper.insertProjectTaskNotification(notification);
+	}
+
 	/*プロジェクトチャット内のコメントを取得*/
 	@Override
 	public List<Comment> getCommentsByProjectId(Integer projectId) {
@@ -323,7 +336,7 @@ public class ProjectServiceImpl implements ProjectService {
 		}
 	}
 
-	/*通知の作成*/
+	/*コメント通知の作成*/
 	@Override
 	public void createCommentNotifications(Integer commentId,
 			Integer projectId,
@@ -362,16 +375,34 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectMapper.getReactionNotificationsByUserId(userId);
 	}
 
-	/*コメント通知の削除*/
+	/*リアクション通知の削除*/
 	@Override
 	public void clearReactionNotifications(Integer userId, Integer projectId) {
 		projectMapper.deleteReactionNotificationsByProjectIdAndUserId(userId, projectId);
 	}
 
-	/*未読コメントの数を取得する*/
+	/*未読リアクションの数を取得する*/
 	@Override
 	public Integer countUnconfirmedReactionsForUser(Integer userId) {
 		return projectMapper.countUnconfirmedReactions(userId);
+	}
+
+	/*プロジェクトタスクを振られた通知の取得*/
+	@Override
+	public List<ProjectTaskNotification> getProjectTaskNotifications(Integer userId) {
+		return projectMapper.getProjectTaskNotificationsByUserId(userId);
+	}
+
+	/*プロジェクトタスク通知の削除*/
+	@Override
+	public void clearProjectTaskNotifications(Integer userId, Integer projectId) {
+		projectMapper.deleteProjectTaskNotificationsByProjectIdAndUserId(userId, projectId);
+	}
+
+	/*未確認プロジェクトタスクの数を取得する*/
+	@Override
+	public Integer countUnconfirmedProjectTasksForUser(Integer userId) {
+		return projectMapper.countUnconfirmedProjectTasks(userId);
 	}
 
 	/*期限が過ぎたプロジェクトタスクを複数件取得*/

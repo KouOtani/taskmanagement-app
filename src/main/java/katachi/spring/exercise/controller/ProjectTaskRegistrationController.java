@@ -84,7 +84,6 @@ public class ProjectTaskRegistrationController {
 		// 入力チェック結果
 		if (bindingResult.hasErrors()) {
 			// NG: プロジェクトタスク登録画面に戻る
-			System.out.println("エラーです");
 			return showProjectTaskRegisterForm(form.getProjectId(), model, locale, form);
 		}
 

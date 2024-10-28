@@ -15,6 +15,7 @@ import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.Project.ProjectStatus;
 import katachi.spring.exercise.domain.user.model.ProjectMember;
 import katachi.spring.exercise.domain.user.model.ProjectTag;
+import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
 import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
@@ -43,6 +44,9 @@ public interface ProjectService {
 
 	/*所属しているプロジェクトのリーダーを重複なく取得*/
 	public List<Project> getUniqueLeadersByUserId(Integer userId);
+
+	/*Projectテーブルの情報を取得*/
+	public Project getProjectByProjectId(Integer projectId);
 
 	/*プロジェクトを検索(１件)*/ //招待画面を表示する
 	public Project getProjectForInvitationById(Integer projectId);
@@ -98,6 +102,9 @@ public interface ProjectService {
 	/*プロジェクトタスクを取得(１件)*/
 	public Task getProjectTaskOneByTaskId(Integer taskId);
 
+	/*プロジェクトタスク追加の通知を作成*/
+	public void createProjectTaskNotification(ProjectTaskNotification notification);
+
 	/*プロジェクチャットト内のコメントを取得*/
 	public List<Comment> getCommentsByProjectId(Integer projectId);
 
@@ -125,7 +132,7 @@ public interface ProjectService {
 	/*リアクションの追加または削除を行う*/
 	public void toggleReaction(Integer commentId, Integer userId);
 
-	/*通知の作成*/
+	/*コメント通知の作成*/
 	public void createCommentNotifications(Integer commentId,
 			Integer projectId,
 			Integer commentingUserId);
@@ -147,6 +154,15 @@ public interface ProjectService {
 
 	/*未確認リアクションの数を取得する*/
 	public Integer countUnconfirmedReactionsForUser(Integer userId);
+
+	/*プロジェクトタスクを振られた通知の取得*/
+	public List<ProjectTaskNotification> getProjectTaskNotifications(Integer userId);
+
+	/*プロジェクトタスク通知の削除*/
+	public void clearProjectTaskNotifications(Integer userId, Integer projectId);
+
+	/*未確認プロジェクトタスクの数を取得する*/
+	public Integer countUnconfirmedProjectTasksForUser(Integer userId);
 
 	/*期限が過ぎたプロジェクトタスクを複数件取得*/
 	public List<Task> getProjectPastDueTasks(Integer userId);

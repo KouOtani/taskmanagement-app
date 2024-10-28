@@ -23,6 +23,7 @@ import katachi.spring.exercise.domain.user.model.CommentReactionNotification;
 import katachi.spring.exercise.domain.user.model.ExtendedUser;
 import katachi.spring.exercise.domain.user.model.Invitation;
 import katachi.spring.exercise.domain.user.model.Invitation.InvitationStatus;
+import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.service.ProjectService;
 import katachi.spring.exercise.domain.user.service.UserService;
@@ -68,7 +69,10 @@ public class NotificationController {
 		// リアクションの通知を取得
 		List<CommentReactionNotification> reactionNotifications = projectService.getReactionNotifications(userDetails.getUserId());
 
-		// 3つのリストを統合
+		// プロジェクトタスクを振られた際の通知を取得
+		List<ProjectTaskNotification> projectTaskNotifications = projectService.getProjectTaskNotifications(userDetails.getUserId());
+
+		// 4つのリストを統合
 		List<NotificationDTO> notifications = new ArrayList<>();
 
 		// 招待の通知をDTOリストに変換
@@ -84,6 +88,11 @@ public class NotificationController {
 		// コメントリアクションの通知をDTOリストに変換
 		for (CommentReactionNotification reactionNotification : reactionNotifications) {
 			notifications.add(new NotificationDTO("REACTION", reactionNotification, reactionNotification.getNotificationDate()));
+		}
+
+		// プロジェクトタスクを振られた際の通知をDTOリストに変換
+		for (ProjectTaskNotification projectTaskNotification : projectTaskNotifications) {
+			notifications.add(new NotificationDTO("TASK_ASSIGNMENT", projectTaskNotification, projectTaskNotification.getNotificationDate()));
 		}
 
 		// 作成日時(createdAt)でソート（新しい順）
@@ -109,10 +118,6 @@ public class NotificationController {
 			// 招待を拒否するロジック
 			projectService.handleInvitation(invitationId, null, InvitationStatus.REJECTED);
 		}
-
-		// 未処理の招待数を更新
-		int pendingInvitations = projectService.countPendingInvitationsForUser(userDetails.getUserId());
-		session.setAttribute("pendingInvitations", pendingInvitations);
 
 		return "redirect:/notifications";
 	}
