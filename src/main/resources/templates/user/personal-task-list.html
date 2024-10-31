@@ -22,77 +22,88 @@
       <a class="btn btn-sm btn-outline-primary ms-4" th:href="@{/entry/personal-task}">タスクを追加</a>
     </div>
 
-    <th:block th:if="${personalTasksList != null and !#lists.isEmpty(personalTasksList)}">
-      <div class="d-flex justify-content-between">
-        <form class="d-flex" role="search" th:action="@{/personal-task}" method="get" style="width: 350px;">
-          <input class="form-control me-2" type="search" placeholder="タスク名で検索" aria-label="Search"
-            th:value="*{searchQuery}" name="searchQuery">
-          <input type="hidden" th:value="*{completed}" name="completed">
-          <button class="btn btn-outline-secondary" type="submit" th:text="#{search}"></button>
-        </form>
-      </div>
+    <div class="d-flex justify-content-between">
+      <form class="d-flex" role="search" th:action="@{/personal-task}" method="get" style="width: 350px;">
+        <input class="form-control me-2" type="search" placeholder="タスク名で検索" aria-label="Search"
+          th:value="*{searchQuery}" name="searchQuery">
+        <input type="hidden" th:value="*{completed}" name="completed">
+        <button class="btn btn-outline-secondary" type="submit" th:text="#{search}"></button>
+      </form>
+    </div>
 
-      <div class="d-flex justify-content-between">
-        <!-- タスクを追加と完了アイテムリンク -->
-        <ul class="nav nav-underline align-self-end">
-          <li class="nav-item">
-            <a class="nav-link text-black" th:href="@{/personal-task}"
-              th:classappend="${currentUri == '/personal-task' and (queryString == null or !queryString.contains('completed=true'))} ? 'active' : ''"
-              aria-current="page">
-              未完了タスク<span th:if="${completed == null or !completed}"
-                th:text="'（' + ${countIncompleteTasks} + '）'"></span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-black" th:href="@{/personal-task(completed=true)}"
-              th:classappend="${currentUri == '/personal-task' and (queryString != null and queryString.contains('completed=true'))} ? 'active' : ''">
-              完了済みタスク
-            </a>
-          </li>
-        </ul>
+    <div class="d-flex justify-content-between">
+      <!-- タスクを追加と完了アイテムリンク -->
+      <ul class="nav nav-underline align-self-end">
+        <li class="nav-item">
+          <a class="nav-link text-black" th:href="@{/personal-task}"
+            th:classappend="${currentUri == '/personal-task' and (queryString == null or !queryString.contains('completed=true'))} ? 'active' : ''"
+            aria-current="page">
+            未完了タスク<span th:if="${completed == null or !completed}"
+              th:text="'（' + ${countIncompleteTasks} + '）'"></span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-black" th:href="@{/personal-task(completed=true)}"
+            th:classappend="${currentUri == '/personal-task' and (queryString != null and queryString.contains('completed=true'))} ? 'active' : ''">
+            完了済みタスク
+          </a>
+        </li>
+      </ul>
 
+      <!-- フィルタリングオプション -->
+      <form id="filterForm" method="get" th:action="@{/personal-task}">
         <!-- フィルタリングオプション -->
-        <form id="filterForm" method="get" th:action="@{/personal-task}">
-          <!-- フィルタリングオプション -->
-          <div class="d-flex align-items-center">
-            <th:block th:if="${completed == null}">
-              <div class="me-4">
-                <label for="status" class="form-label">ステータス:</label>
-                <select id="status" class="form-select" name="status" onchange="submitFilterForm()">
-                  <option value="">すべて</option>
-                  <option th:each="statusItem : ${statusList}" th:value="${statusItem.name()}"
-                    th:text="${statusItem.displayValue}"
-                    th:selected="${status != null and status.name() == statusItem.name()}">
-                  </option>
-                </select>
-              </div>
-            </th:block>
-
+        <div class="d-flex align-items-center">
+          <!-- タグ -->
+          <th:block th:if="${tagsList != null and !#lists.isEmpty(tagsList)}">
             <div class="me-4">
-              <label for="priority" class="form-label">優先度:</label>
-              <select id="priority" class="form-select" name="priority" onchange="submitFilterForm()">
+              <label for="tag" class="form-label">タグ:</label>
+              <select id="tag" class="form-select" name="tag" onchange="submitFilterForm()">
                 <option value="">すべて</option>
-                <option th:each="priorityItem : ${priorities}" th:value="${priorityItem.name()}"
-                  th:text="${priorityItem.displayValue}"
-                  th:selected="${priority != null and priority.name() == priorityItem.name()}">
+                <option th:each="tag : ${tagsList}" th:value="${tag.id}" th:text="${tag.name}"
+                  th:selected="${tagId != null and tagId == tag.id}">
                 </option>
               </select>
             </div>
+          </th:block>
 
+          <th:block th:if="${completed == null}">
             <div class="me-4">
-              <label for="dueDate" class="form-label">期日:</label>
-              <select id="dueDate" class="form-select" name="dueDate" onchange="submitFilterForm()">
-                <option value="asc" th:selected="${dueDate == 'asc'}">昇順</option>
-                <option value="desc" th:selected="${dueDate == 'desc'}">降順</option>
+              <label for="status" class="form-label">ステータス:</label>
+              <select id="status" class="form-select" name="status" onchange="submitFilterForm()">
+                <option value="">すべて</option>
+                <option th:each="statusItem : ${statusList}" th:value="${statusItem.name()}"
+                  th:text="${statusItem.displayValue}"
+                  th:selected="${status != null and status.name() == statusItem.name()}">
+                </option>
               </select>
             </div>
+          </th:block>
 
+          <div class="me-4">
+            <label for="priority" class="form-label">優先度:</label>
+            <select id="priority" class="form-select" name="priority" onchange="submitFilterForm()">
+              <option value="">すべて</option>
+              <option th:each="priorityItem : ${priorities}" th:value="${priorityItem.name()}"
+                th:text="${priorityItem.displayValue}"
+                th:selected="${priority != null and priority.name() == priorityItem.name()}">
+              </option>
+            </select>
           </div>
-          <!-- completed の値を hidden フィールドとして設定 -->
-          <input type="hidden" th:value="*{completed}" name="completed">
-        </form>
-      </div>
-    </th:block>
+
+          <div class="me-4">
+            <label for="dueDate" class="form-label">期日:</label>
+            <select id="dueDate" class="form-select" name="dueDate" onchange="submitFilterForm()">
+              <option value="asc" th:selected="${dueDate == 'asc'}">昇順</option>
+              <option value="desc" th:selected="${dueDate == 'desc'}">降順</option>
+            </select>
+          </div>
+
+        </div>
+        <!-- completed の値を hidden フィールドとして設定 -->
+        <input type="hidden" th:value="*{completed}" name="completed">
+      </form>
+    </div>
 
     <!-- メッセージが存在する場合にアラートを表示 -->
     <th:block th:if="${message}">
@@ -119,7 +130,7 @@
     <ul class="list-group mt-4">
       <!-- タスクアイテム -->
       <li th:each="task : ${personalTasksList}"
-        class="list-group-item d-flex justify-content-between align-items-center py-3">
+        class="list-group-item d-flex justify-content-between align-items-center py-3 rounded shadow">
         <div style="width: 900px;">
           <!-- 締め切り日を過ぎたタスクのメッセージ -->
           <p th:if="${task.dueDate != null and task.dueDate.isBefore(currentDate) and (queryString == null or !queryString.contains('completed=true'))}"
@@ -171,11 +182,11 @@
           <p class="mb-1">
             タグ:
             <span th:each="tag : ${task.tagsList}" class="badge bg-dark me-1">
-              <a th:href="@{/personal-task(completed=${completed}, tagName=${tag.name})}"
+              <a th:href="@{/personal-task(completed=${completed}, tag=${tag.id}, tagName=${tag.name})}"
                 th:text="${tag.name}" class="text-light"></a>
             </span>
             <small th:if="${task.tagsList != null and !#lists.isEmpty(task.tagsList)}"
-              class="text-muted">タグをクリックしてタスクを絞り込み</small>
+              class="text-muted">タグをクリックして検索</small>
             <small
               th:unless="${task.tagsList != null and !#lists.isEmpty(task.tagsList)}">タグ付けされていません</small>
           </p>
@@ -189,21 +200,28 @@
 
         <div>
           <!-- アクションボタン -->
-          <th:block
-            th:if="${currentUri == '/personal-task' and (queryString == null or !queryString.contains('completed=true'))}">
-            <a class="btn btn-sm btn-primary" th:href="@{'/update/personal-task/' + ${task.id}}">編集</a>
-            <a class="btn btn-sm btn-danger" th:href="@{'/delete/personal-task/' + ${task.id}}">削除</a>
-            <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
-              style="display:inline;">
-              <button type="submit" class="btn btn-sm btn-secondary">完了</button>
-              <!-- currentUri の値を hidden フィールドとして設定 -->
-              <input type="hidden" th:value="*{currentUri}" name="currentUri">
-            </form>
-          </th:block>
-          <th:block th:if="${currentUri == '/personal-task' and queryString == 'completed=true'}">
-            <form th:action="@{/update/undo/{id}(id=${task.id})}" method="post" style="display:inline;">
-              <button type="submit" class="btn btn-sm btn-secondary">未完了タスクに戻す</button>
-            </form>
+          <div class="d-flex align-items-center gap-2">
+            <th:block
+              th:if="${currentUri == '/personal-task' and (queryString == null or !queryString.contains('completed=true'))}">
+              <a class="btn btn-sm btn-primary rounded-pill shadow-sm"
+                th:href="@{'/update/personal-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger rounded-pill shadow-sm"
+                th:href="@{'/delete/personal-task/' + ${task.id}}">削除</a>
+              <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
+                style="display:inline;">
+                <button type="submit"
+                  class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
+                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <input type="hidden" th:value="*{currentUri}" name="currentUri">
+              </form>
+            </th:block>
+            <th:block th:if="${currentUri == '/personal-task' and queryString == 'completed=true'}">
+              <form th:action="@{/update/undo/{id}(id=${task.id})}" method="post" style="display:inline;">
+                <button type="submit"
+                  class="btn btn-sm btn-secondary rounded-pill shadow-sm">未完了タスクに戻す</button>
+              </form>
+            </th:block>
+          </div>
         </div>
       </li>
     </ul>

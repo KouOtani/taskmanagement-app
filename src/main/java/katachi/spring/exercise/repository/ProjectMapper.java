@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import katachi.spring.exercise.domain.user.model.Comment;
 import katachi.spring.exercise.domain.user.model.CommentAttachment;
 import katachi.spring.exercise.domain.user.model.CommentNotification;
+import katachi.spring.exercise.domain.user.model.CommentReaction;
 import katachi.spring.exercise.domain.user.model.CommentReactionNotification;
 import katachi.spring.exercise.domain.user.model.Invitation;
 import katachi.spring.exercise.domain.user.model.Invitation.InvitationStatus;
@@ -16,6 +17,7 @@ import katachi.spring.exercise.domain.user.model.Project.ProjectStatus;
 import katachi.spring.exercise.domain.user.model.ProjectMember;
 import katachi.spring.exercise.domain.user.model.ProjectTag;
 import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
+import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
 import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
@@ -38,7 +40,7 @@ public interface ProjectMapper {
 			@Param("leaderId") Integer leaderId,
 			@Param("status") ProjectStatus status,
 			@Param("dueDateOrder") String dueDateOrder,
-			@Param("tagName") String tagName);
+			@Param("tagId") Integer tagId);
 
 	/*所属しているプロジェクトのリーダーを重複なく取得*/
 	public List<Project> findLeadersByUserId(@Param("userId") Integer userId);
@@ -69,6 +71,9 @@ public interface ProjectMapper {
 
 	/*プロジェクトのメンバーを検索*/
 	public List<ProjectMember> findMembersByProjectId(@Param("projectId") Integer projectId);
+
+	/*ユーザーが所属するプロジェクトに基づくタグを一覧で取得する*/
+	public List<Tag> selectTagsForProjects(@Param("userId") Integer userId);
 
 	/*プロジェクトのメンバーにそのユーザーが含まれているかチェック*/
 	public Integer isMemberOfProjectByEmail(@Param("projectId") Integer projectId, @Param("email") String email);
@@ -114,7 +119,18 @@ public interface ProjectMapper {
 	public void insertProjectTaskNotification(ProjectTaskNotification notification);
 
 	/*プロジェクトチャット内のコメントを取得*/
-	public List<Comment> getCommentsByProjectId(Integer projectId);
+	public List<Comment> getCommentsByProjectIdWithPagination(@Param("projectId") Integer projectId,
+			@Param("offset") Integer offset,
+			@Param("size") Integer size);
+
+	/*コメントのリアクションを取得するメソッド*/
+	public List<CommentReaction> getReactionsByCommentId(@Param("commentId") Integer commentId);
+
+	/*コメントの添付ファイルを取得するメソッド*/
+	public List<CommentAttachment> getAttachmentsByCommentId(@Param("commentId") Integer commentId);
+
+	/*プロジェクトチャット内のコメント数をカウントする*/
+	public int countCommentsByProjectId(@Param("projectId") Integer projectId);
 
 	/*プロジェクトチャット内のコメントを保存*/
 	public void insertComment(Comment comment);

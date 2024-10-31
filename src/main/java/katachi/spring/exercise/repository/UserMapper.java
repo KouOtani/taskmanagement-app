@@ -7,7 +7,6 @@ import org.apache.ibatis.annotations.Param;
 
 import katachi.spring.exercise.domain.user.model.AssignedTo;
 import katachi.spring.exercise.domain.user.model.MUser;
-import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
@@ -48,7 +47,7 @@ public interface UserMapper {
 			@Param("status") TaskStatus status,
 			@Param("priority") TaskPriority priority,
 			@Param("dueDateOrder") String dueDateOrder,
-			@Param("tagName") String tagName);
+			@Param("tagId") Integer tagId);
 
 	/*期限が過ぎた個人タスクを複数件取得*/
 	public List<Task> findPersonalPastDueTasks(Integer userId);
@@ -80,7 +79,8 @@ public interface UserMapper {
 	/*個人タスクを'進行中'に戻す*/
 	public void restoreInprogress(@Param("taskId") Integer taskId);
 
-	/*プロジェクトを登録*/
-	public int insertProject(Project project);
+	/*ユーザーに基づくタグを一覧で取得する*/
+	public List<Tag> selectTagsForPersonalTasks(@Param("userId") Integer userId,
+			@Param("completed") Boolean completed);
 
 }

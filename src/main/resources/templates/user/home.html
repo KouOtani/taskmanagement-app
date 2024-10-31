@@ -26,9 +26,9 @@
         <ul class="list-group">
           <!-- タスクごとにリストアイテムを生成 -->
           <li th:each="task : ${personalOneWeekDueTasks}"
-            class="list-group-item d-flex justify-content-between align-items-center">
+            class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-3 p-3">
             <div class="p-2" style="width: 340px;">
-              <h5 class="my-2" th:text="${task.title}"></h5>
+              <h5 class="mb-2" th:text="${task.title}"></h5>
               <!-- 締め切り日 -->
               <p class="text-muted mb-2">
                 <i class="bi bi-calendar-event"></i> 締め切り:
@@ -37,25 +37,34 @@
 
               <!-- 期日までの残り日数を表示 -->
               <div th:if="${task.getDaysUntilDueDate() >= 0}"
-                class="mb-0 p-2 alert alert-info d-flex align-items-center" style="width: 245px;">
+                class="mb-0 p-2 alert alert-info d-flex align-items-center rounded-pill shadow-sm"
+                style="width: 245px;">
                 <i class="bi bi-clock me-2"></i>
                 <span>締め切り日まで残り</span>
                 <span class="fw-bold mx-1" th:text="${task.getDaysUntilDueDate()}"></span> 日
               </div>
             </div>
 
-            <div>
+            <div class="d-flex align-items-center gap-2">
               <!-- アクションボタン -->
-              <a class="btn btn-sm btn-primary" th:href="@{'/update/personal-task/' + ${task.id}}">編集</a>
-              <a class="btn btn-sm btn-danger" th:href="@{'/delete/personal-task/' + ${task.id}}">削除</a>
+              <a class="btn btn-sm btn-primary rounded-pill shadow-sm"
+                th:href="@{'/update/personal-task/' + ${task.id}}">
+                編集
+              </a>
+              <a class="btn btn-sm btn-danger rounded-pill shadow-sm"
+                th:href="@{'/delete/personal-task/' + ${task.id}}">
+                削除
+              </a>
               <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
                 style="display:inline;">
-                <button type="submit" class="btn btn-sm btn-secondary">完了</button>
+                <button type="submit"
+                  class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
                 <!-- currentUri の値を hidden フィールドとして設定 -->
                 <input type="hidden" th:value="*{currentUri}" name="currentUri">
               </form>
             </div>
           </li>
+
         </ul>
       </div>
 
@@ -64,17 +73,15 @@
         <ul class="list-group">
           <!-- タスクごとにリストアイテムを生成 -->
           <li th:each="task : ${personalPastDueTasks}"
-            class="list-group-item d-flex justify-content-between align-items-center">
+            class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-3 p-3">
             <div class="p-2" style="width: 340px;">
               <h5 class="mb-2 font-weight-bold" th:text="${task.title}"></h5>
-              <!-- 締め切り日 -->
               <p class="text-muted mb-2">
                 <i class="bi bi-calendar-event"></i> 締め切り:
                 <span th:text="${task.dueDate}"></span>
               </p>
-
-              <!-- 経過日数を表示 -->
-              <div th:if="${task.getDaysSinceDueDate() > 0}" class="alert alert-danger mb-0 p-2"
+              <div th:if="${task.getDaysSinceDueDate() > 0}"
+                class="alert alert-danger mb-0 p-2 rounded-pill shadow-sm d-flex align-items-center"
                 style="width: 245px;">
                 <i class="bi bi-clock me-2"></i>
                 <span>締め切り日から</span>
@@ -82,14 +89,15 @@
                 日経過
               </div>
             </div>
-            <div>
-              <!-- アクションボタン -->
-              <a class="btn btn-sm btn-primary" th:href="@{'/update/personal-task/' + ${task.id}}">編集</a>
-              <a class="btn btn-sm btn-danger" th:href="@{'/delete/personal-task/' + ${task.id}}">削除</a>
+            <div class="d-flex align-items-center gap-2">
+              <a class="btn btn-sm btn-primary rounded-pill shadow-sm"
+                th:href="@{'/update/personal-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger rounded-pill shadow-sm"
+                th:href="@{'/delete/personal-task/' + ${task.id}}">削除</a>
               <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
                 style="display:inline;">
-                <button type="submit" class="btn btn-sm btn-secondary">完了</button>
-                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <button type="submit"
+                  class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
                 <input type="hidden" th:value="*{currentUri}" name="currentUri">
               </form>
             </div>
@@ -105,42 +113,34 @@
         <ul class="list-group">
           <!-- タスクごとにリストアイテムを生成 -->
           <li th:each="task : ${projectOneWeekDueTasks}"
-            class="list-group-item d-flex justify-content-between align-items-center">
+            class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-3 p-3">
             <div class="p-2" style="width: 340px;">
-              <!-- プロジェクトタイトル -->
-              <!-- プロジェクト名をクリック可能にする -->
               <h5 class="text-primary fw-bold mb-2">
-                <a th:href="@{/project}" class="text-primary text-decoration-none">
-                  「<span th:text="${task.project.title}"></span>」
-                </a>
+                <a th:href="@{/project}" class="text-primary text-decoration-none">「<span
+                    th:text="${task.project.title}"></span>」</a>
               </h5>
-
-              <!-- タスクタイトル -->
               <h5 class="mb-2" th:text="${task.title}"></h5>
-
-              <!-- 締め切り日 -->
               <p class="text-muted mb-2">
                 <i class="bi bi-calendar-event"></i> 締め切り:
                 <span th:text="${task.dueDate}"></span>
               </p>
-
-              <!-- 期日までの残り日数を表示 -->
               <div th:if="${task.getDaysUntilDueDate() >= 0}"
-                class="mb-0 p-2 alert alert-info d-flex align-items-center" style="width: 245px;">
+                class="alert alert-info mb-0 p-2 rounded-pill shadow-sm d-flex align-items-center"
+                style="width: 245px;">
                 <i class="bi bi-clock me-2"></i>
                 <span>締め切り日まで残り</span>
                 <span class="fw-bold mx-1" th:text="${task.getDaysUntilDueDate()}"></span> 日
               </div>
             </div>
-
-            <div>
-              <!-- アクションボタン -->
-              <a class="btn btn-sm btn-primary" th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
-              <a class="btn btn-sm btn-danger" th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
+            <div class="d-flex align-items-center gap-2">
+              <a class="btn btn-sm btn-primary rounded-pill shadow-sm"
+                th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger rounded-pill shadow-sm"
+                th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
               <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
                 style="display:inline;">
-                <button type="submit" class="btn btn-sm btn-secondary">完了</button>
-                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <button type="submit"
+                  class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
                 <input type="hidden" th:value="*{currentUri}" name="currentUri">
               </form>
             </div>
@@ -153,42 +153,36 @@
         <ul class="list-group">
           <!-- タスクごとにリストアイテムを生成 -->
           <li th:each="task : ${projectPastDueTasks}"
-            class="list-group-item d-flex justify-content-between align-items-center">
+            class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-3 p-3">
             <div class="p-2" style="width: 340px;">
-              <!-- プロジェクトタイトル -->
               <h5 class="text-primary fw-bold mb-2">
-                <a th:href="@{/project-task/{id}(id=${task.projectId})}" class="text-primary text-decoration-none">
+                <a th:href="@{/project-task/{id}(id=${task.projectId})}"
+                  class="text-primary text-decoration-none">
                   「<span th:text="${task.project.title}"></span>」
                 </a>
               </h5>
-
-              <!-- タスクタイトル -->
               <h5 class="mb-2" th:text="${task.title}"></h5>
-
-              <!-- 締め切り日 -->
               <p class="text-muted mb-2">
                 <i class="bi bi-calendar-event"></i> 締め切り:
                 <span th:text="${task.dueDate}"></span>
               </p>
-
-              <!-- 経過日数を表示 -->
-              <div th:if="${task.getDaysSinceDueDate() > 0}" class="alert alert-danger mb-0 p-2"
+              <div th:if="${task.getDaysSinceDueDate() > 0}"
+                class="alert alert-danger mb-0 p-2 rounded-pill shadow-sm d-flex align-items-center"
                 style="width: 245px;">
                 <i class="bi bi-clock me-2"></i>
                 <span>締め切り日から</span>
-                <span class="fw-bold mx-1" th:text="${task.getDaysSinceDueDate()}"></span>
-                日経過
+                <span class="fw-bold mx-1" th:text="${task.getDaysSinceDueDate()}"></span> 日経過
               </div>
             </div>
-
-            <div>
-              <!-- アクションボタン -->
-              <a class="btn btn-sm btn-primary" th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
-              <a class="btn btn-sm btn-danger" th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
+            <div class="d-flex align-items-center gap-2">
+              <a class="btn btn-sm btn-primary rounded-pill shadow-sm"
+                th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger rounded-pill shadow-sm"
+                th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
               <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
                 style="display:inline;">
-                <button type="submit" class="btn btn-sm btn-secondary">完了</button>
-                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <button type="submit"
+                  class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
                 <input type="hidden" th:value="*{currentUri}" name="currentUri">
               </form>
             </div>
@@ -208,11 +202,11 @@
 
             <!-- プロジェクト名をクリック可能にする -->
             <h5 class="text-primary fw-bold mb-2">
-              <a th:href="@{/project-task/{id}(id=${project.id})}" class="text-primary text-decoration-none">
+              <a th:href="@{/project-task/{id}(id=${project.id})}"
+                class="text-primary text-decoration-none">
                 「<span th:text="${project.title}"></span>」
               </a>
             </h5>
-
 
             <!-- プロジェクトの締め切り情報 -->
             <p class="mb-1">

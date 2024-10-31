@@ -227,13 +227,13 @@
     pm_sub.user_id = #{userId}
     )
 
-    <if test="tagName != null and tagName != ''">
+    <if test="tagId != null">
       AND p.id IN (
       SELECT p.id
       FROM project p
       JOIN project_tag pt ON p.id = pt.project_id
       JOIN tag ON pt.tag_id = tag.id
-      WHERE tag.name = #{tagName}
+      WHERE tag.id = #{tagId}
       )
     </if>
 
@@ -376,6 +376,21 @@
     m_users mu ON pm.user_id = mu.id
     WHERE
     pm.project_id = #{projectId}
+  </select>
+
+  <!-- プロジェクトに関連するタグの取得 -->
+  <select id="selectTagsForProjects" resultType="Tag">
+    SELECT DISTINCT
+    tag.id,
+    tag.name
+    FROM
+    tag
+    INNER JOIN
+    project_tag pt ON tag.id = pt.tag_id
+    INNER JOIN
+    project_member pm ON pt.project_id = pm.project_id  <!-- ユーザーが所属しているプロジェクトと結合 -->
+    WHERE
+    pm.user_id = #{userId}  <!-- userIdで絞り込み -->
   </select>
 
   <!-- プロジェクトのメンバーに、指定したメールアドレスのユーザーが含まれているかを確認 -->
@@ -534,7 +549,7 @@
     t.id = #{taskId}
   </select>
 
-<!-- プロジェクトタスクに担当されたの通知を作成 -->
+  <!-- プロジェクトタスクに担当されたの通知を作成 -->
   <insert id="insertProjectTaskNotification">
     INSERT INTO
     project_task_notification (
@@ -570,27 +585,70 @@
   </update>
 
   <!-- コメントを取得する -->
-  <select id="getCommentsByProjectId" resultMap="comment">
+  <!-- <select id="getCommentsByProjectIdWithPagination" -->
+  <!-- resultMap="comment"> -->
+  <!-- SELECT -->
+  <!-- c.*, -->
+  <!-- u.family_name AS user_family_name, -->
+  <!-- u.first_name AS user_first_name, -->
+  <!-- (SELECT COUNT(cr2.user_id) -->
+  <!-- FROM comment_reaction cr2 -->
+  <!-- WHERE cr2.comment_id = c.id) AS reactor_count, -->
+  <!-- u2.family_name AS reactors_family_name, -->
+  <!-- u2.first_name AS reactors_first_name, -->
+  <!-- ca.id AS attachments_id, -->
+  <!-- ca.file_name AS attachments_file_name, -->
+  <!-- ca.file_path AS attachments_file_path -->
+  <!-- FROM comment c -->
+  <!-- JOIN m_users u ON c.user_id = u.id -->
+  <!-- LEFT JOIN comment_reaction cr ON c.id = cr.comment_id -->
+  <!-- LEFT JOIN m_users u2 ON cr.user_id = u2.id -->
+  <!-- LEFT JOIN comment_attachment ca ON c.id = ca.comment_id -->
+  <!-- WHERE c.project_id = #{projectId} -->
+  <!-- ORDER BY c.created_at DESC -->
+  <!-- LIMIT #{size} OFFSET #{offset} -->
+  <!-- </select> -->
+
+  <!-- 上記のクエリでは各コメントがリアクションや添付ファイルによって重複し、必要なコメント数を取得できない。 -->
+  <!-- これを解消するため、リアクションや添付ファイルは別クエリで取得し、コメント情報とコード上で合成します -->
+  <!-- 下記3つのクエリが上記クエリを分割したもの -->
+
+  <!-- コメントを取得する -->
+  <select id="getCommentsByProjectIdWithPagination"
+    resultMap="comment">
     SELECT
     c.*,
     u.family_name AS user_family_name,
-    u.first_name AS user_first_name,
-    (SELECT COUNT(cr2.user_id)
-    FROM comment_reaction cr2
-    WHERE cr2.comment_id = c.id) AS reactor_count,
-    u2.family_name AS reactors_family_name,
-    u2.first_name AS reactors_first_name,
-    ca.id AS attachments_id,
-    ca.file_name AS attachments_file_name,
-    ca.file_path AS attachments_file_path
+    u.first_name AS user_first_name
     FROM comment c
     JOIN m_users u ON c.user_id = u.id
-    LEFT JOIN comment_reaction cr ON c.id = cr.comment_id
-    LEFT JOIN m_users u2 ON cr.user_id = u2.id
-    LEFT JOIN comment_attachment ca ON c.id = ca.comment_id
     WHERE c.project_id = #{projectId}
-    ORDER BY c.created_at ASC
+    ORDER BY c.created_at DESC
+    LIMIT #{size} OFFSET #{offset}
   </select>
+
+  <!-- リアクションを取得 -->
+  <select id="getReactionsByCommentId"
+    resultType="CommentReaction">
+    SELECT u.id, u.family_name, u.first_name
+    FROM comment_reaction cr
+    JOIN m_users u ON cr.user_id = u.id
+    WHERE cr.comment_id = #{commentId}
+  </select>
+
+  <!-- 添付ファイルを取得 -->
+  <select id="getAttachmentsByCommentId"
+    resultType="CommentAttachment">
+    SELECT ca.id, ca.file_name, ca.file_path
+    FROM comment_attachment ca
+    WHERE ca.comment_id = #{commentId}
+  </select>
+
+  <select id="countCommentsByProjectId" resultType="int">
+    SELECT COUNT(*) FROM comment
+    WHERE project_id = #{projectId}
+  </select>
+
 
   <!-- コメントを保存する -->
   <insert id="insertComment" useGeneratedKeys="true"
@@ -628,6 +686,7 @@
     )
   </update>
 
+  <!-- 添付ファイル内の情報を取得する -->
   <select id="findCommentAttachmentById"
     resultType="CommentAttachment">
     SELECT * FROM comment_attachment WHERE id = #{attachmentId}
@@ -798,24 +857,24 @@
   <select id="getProjectTaskNotificationsByUserId"
     resultType="ProjectTaskNotification">
     SELECT
-        ptn.id,
-        ptn.assigner_id AS assignerId,
-        ptn.assignee_id AS assigneeId,
-        ptn.created_at AS notificationDate,
-        p.id AS projectId,
-        p.title AS projectName,
-        t.title AS taskTitle,
-        CONCAT(u.family_name, ' ', u.first_name) AS assignerName
+    ptn.id,
+    ptn.assigner_id AS assignerId,
+    ptn.assignee_id AS assigneeId,
+    ptn.created_at AS notificationDate,
+    p.id AS projectId,
+    p.title AS projectName,
+    t.title AS taskTitle,
+    CONCAT(u.family_name, ' ', u.first_name) AS assignerName
     FROM
-        project_task_notification ptn
+    project_task_notification ptn
     JOIN
-        task t ON ptn.task_id = t.id
+    task t ON ptn.task_id = t.id
     JOIN
-        project p ON t.project_id = p.id
+    project p ON t.project_id = p.id
     JOIN
-        m_users u ON ptn.assigner_id = u.id
+    m_users u ON ptn.assigner_id = u.id
     WHERE
-        ptn.assignee_id = #{userId}
+    ptn.assignee_id = #{userId}
   </select>
 
   <!-- プロジェクトタスク通知の削除 -->

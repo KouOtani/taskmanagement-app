@@ -16,6 +16,7 @@ import katachi.spring.exercise.application.service.UserApplicationService;
 import katachi.spring.exercise.domain.user.model.ExtendedUser;
 import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.Project.ProjectStatus;
+import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
 import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
@@ -49,7 +50,8 @@ public class ProjectController {
 			@RequestParam(required = false) Integer leaderId,
 			@RequestParam(required = false) ProjectStatus status,
 			@RequestParam(required = false) String dueDate, // "asc" or "desc"
-			@RequestParam(required = false) String tagName, // タグフィルタ用
+			@RequestParam(value = "tag", required = false) Integer tagId, // name="tag" の値を取得
+			@RequestParam(required = false) String tagName,
 			Model model) {
 
 		// 現在のユーザー情報を取得
@@ -68,10 +70,13 @@ public class ProjectController {
 				leaderId,
 				status,
 				dueDate,
-				tagName);
+				tagId);
 
 		// ユーザーが所属しているプロジェクトのリーダーを重複なく取得
 		List<Project> leadersList = projectService.getUniqueLeadersByUserId(userDetails.getUserId());
+
+		// 自分が所属しているプロジェクトのタグ一覧の取得
+		List<Tag> tagsList = projectService.getTagsForProjects(userDetails.getUserId());
 
 		// Modelに登録
 		model.addAttribute("personalTodayDueTasks", personalTodayDueTasks);//処理をまとめるように検討する
@@ -85,6 +90,8 @@ public class ProjectController {
 		model.addAttribute("currentDate", LocalDate.now()); // 現在の日付を取得
 		model.addAttribute("oneWeekFromNow", LocalDate.now().plusWeeks(1)); // // 一週間後の日付を計算
 		model.addAttribute("userId", userDetails.getUserId());
+		model.addAttribute("tagsList", tagsList);
+		model.addAttribute("tagId", tagId);
 
 		// 作業一覧画面を表示
 		return "project/project-list";

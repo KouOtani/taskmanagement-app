@@ -42,9 +42,9 @@
 
     <div class="card">
       <div class="card-body">
-        <h5>コメント一覧</h5>
+        <h5 th:if="${comments != null and !#lists.isEmpty(comments)}">コメント一覧</h5>
         <div th:each="comment : ${comments}">
-          <div class="border p-2 mb-2">
+          <div class="border p-2 mb-2 rounded shadow-sm">
             <strong th:text="${comment.user.fullName}">ユーザー名</strong>
             <p class="mt-1" th:text="${comment.content}">コメント内容</p>
             <small th:text="${#dates.format(comment.createdAt, 'yyyy/MM/dd HH:mm')}">投稿日</small>
@@ -103,6 +103,33 @@
           </div>
         </div>
 
+        <div th:if="${comments != null and !#lists.isEmpty(comments)}" class="row">
+          <div class="col-12 text-center">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" th:if="${page > 1}">
+                <a class="page-link"
+                  th:href="@{'/project/chat/' + ${projectId} + '?page=' + (${page} - 1) + '&size=' + ${size}}"
+                  aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
+                <li class="page-item" th:classappend="${pageNum == page} ? 'active'">
+                  <a class="page-link" th:text="${pageNum}"
+                    th:href="@{'/project/chat/' + ${projectId} + '?page=' + ${pageNum} + '&size=' + ${size}}"></a>
+                </li>
+              </th:block>
+              <li class="page-item" th:if="${page < totalPages}">
+                <a class="page-link"
+                  th:href="@{'/project/chat/' + ${projectId} + '?page=' + (${page} + 1) + '&size=' + ${size}}"
+                  aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <h5 class="my-2" th:if="${editComment != null}">コメントを編集</h5>
         <h5 class="my-2" th:if="${editComment == null}">新しいコメントを投稿</h5>
 
@@ -111,7 +138,7 @@
           <input type="hidden" name="userId" th:value="${session.userId}" />
           <input type="hidden" name="commentId"
             th:value="${editComment != null} ? ${editComment.id} : null" />
-          <div class="form-group">
+          <div class="form-group rounded shadow-sm">
             <textarea id="edit" name="content" class="form-control" rows="3" placeholder="コメントを入力..."
               required th:text="${editComment != null} ? ${editComment.content} : ''"></textarea>
           </div>

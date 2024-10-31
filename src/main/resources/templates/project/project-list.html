@@ -35,6 +35,19 @@
         <form id="filterForm" method="get" th:action="@{/project}">
           <!-- フィルタリングオプション -->
           <div class="d-flex align-items-center">
+            <!-- タグ -->
+            <th:block th:if="${tagsList != null and !#lists.isEmpty(tagsList)}">
+              <div class="me-4">
+                <label for="tag" class="form-label">タグ:</label>
+                <select id="tag" class="form-select" name="tag" onchange="submitFilterForm()">
+                  <option value="">すべて</option>
+                  <option th:each="tag : ${tagsList}" th:value="${tag.id}" th:text="${tag.name}"
+                    th:selected="${tagId != null and tagId == tag.id}">
+                  </option>
+                </select>
+              </div>
+            </th:block>
+
             <div class="me-4">
               <label for="leaderId" class="form-label">リーダー:</label>
               <select id="leaderId" class="form-select" name="leaderId" onchange="submitFilterForm()">
@@ -135,7 +148,7 @@
               <p>
                 <strong>タグ : </strong>
                 <span th:each="tag : ${project.tagsList}" class="badge bg-dark me-1">
-                  <a th:href="@{/project(tagName=${tag.name})}" th:text="${tag.name}"
+                  <a th:href="@{/project(tag=${tag.id}, tagName=${tag.name})}" th:text="${tag.name}"
                     class="text-light"></a>
                 </span>
                 <small th:if="${project.tagsList != null and !#lists.isEmpty(project.tagsList)}"
@@ -156,15 +169,15 @@
             <!-- カードのフッター -->
             <div class="card-footer text-end">
               <a th:href="@{/project-task/{id}(id=${project.id})}"
-                class="btn btn-outline-primary btn-sm mt-2">タスクを確認・追加</a>
+                class="btn btn-outline-primary btn-sm mt-2 rounded-pill shadow-sm">タスクを確認・追加</a>
 
               <!-- メンバー招待リンク -->
               <a th:href="@{/project/invite/{id}(id=${project.id})}"
-                class="btn btn-outline-success btn-sm mt-2">メンバーを招待</a>
+                class="btn btn-outline-success btn-sm mt-2 rounded-pill shadow-sm">メンバーを招待</a>
 
               <!-- メンバー招待リンク -->
               <a th:href="@{/project/chat/{id}(id=${project.id})}"
-                class="btn btn-outline-danger btn-sm mt-2">チャット</a>
+                class="btn btn-outline-danger btn-sm mt-2 rounded-pill shadow-sm">チャット</a>
             </div>
           </div>
         </div>

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import katachi.spring.exercise.domain.user.model.AssignedTo;
 import katachi.spring.exercise.domain.user.model.MUser;
-import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
@@ -91,8 +90,8 @@ public class UserServiceImpl implements UserService {
 			TaskStatus status,
 			TaskPriority priority,
 			String dueDateOrder,
-			String tagName) {
-		return mapper.findManyPersonalTasks(userId, searchQuery, completed, status, priority, dueDateOrder, tagName);
+			Integer tagId) {
+		return mapper.findManyPersonalTasks(userId, searchQuery, completed, status, priority, dueDateOrder, tagId);
 	}
 
 	/*期限が過ぎた個人タスクを複数件取得*/
@@ -153,10 +152,10 @@ public class UserServiceImpl implements UserService {
 		mapper.restoreInprogress(taskId);
 	}
 
-	/*プロジェクトを登録*/
+	/*ユーザーに基づくタグを一覧で取得する*/
 	@Override
-	public void projectEntry(Project project) {
-		mapper.insertProject(project);
+	public List<Tag> getTagsForPersonalTasks(Integer userId, Boolean completed) {
+		return mapper.selectTagsForPersonalTasks(userId, completed);
 	}
 
 }

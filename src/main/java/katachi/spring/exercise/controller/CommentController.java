@@ -1,6 +1,7 @@
 package katachi.spring.exercise.controller;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,6 @@ import jakarta.servlet.http.HttpSession;
 import katachi.spring.exercise.application.service.UserApplicationService;
 import katachi.spring.exercise.domain.user.model.Comment;
 import katachi.spring.exercise.domain.user.model.ExtendedUser;
-import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.service.ProjectService;
 
 @Controller
@@ -44,14 +44,26 @@ public class CommentController {
 
 	// チャットページの表示
 	@GetMapping("/chat/{projectId}")
-	public String getChatPage(@PathVariable("projectId") Integer projectId,
+	public String getChatPage(
+			@PathVariable("projectId") Integer projectId,
+			@RequestParam(name = "page", defaultValue = "1") Integer page,
+			@RequestParam(name = "size", defaultValue = "20") Integer size,
 			Model model) {
 
 		// 現在のユーザー情報を取得
 		ExtendedUser userDetails = applicationService.getCurrentUserDetails();
 		Integer userId = userDetails.getUserId();
 
-		List<Comment> comments = projectService.getCommentsByProjectId(projectId);
+		// コメントをページごとに取得
+		List<Comment> comments = projectService.getCommentsByProjectIdWithPagination(projectId, page, size);
+		Collections.reverse(comments); // 最新のコメントから古いコメントの順に並ぶため、コメントリストを逆順にする
+
+		// 各コメントにリアクションと添付ファイルを追加
+		projectService.addReactionsAndAttachmentsToComments(comments);
+
+		// コメントの総数を取得し、総ページ数を計算
+		int totalComments = projectService.countCommentsByProjectId(projectId);
+		int totalPages = Math.max(1, (int) Math.ceil((double) totalComments / size));
 
 		// 各コメントに対して、ユーザーがリアクションしているかどうかを確認
 		for (Comment comment : comments) {
@@ -65,19 +77,10 @@ public class CommentController {
 		// プロジェクトに基づいたリアクションの通知を削除
 		projectService.clearReactionNotifications(userId, projectId);
 
-		// projectIdからプロジェクトの情報を取得
-		Project project = projectService.getProjectByProjectId(projectId);
-
-		// ユーザーの未処理の招待数を取得
+		// ユーザーの未処理の招待数、未読コメント通知数、未確認リアクション通知数、未確認プロジェクトタスク通知数を取得
 		int pendingInvitations = projectService.countPendingInvitationsForUser(userId);
-
-		// ユーザーの未読コメント通知数を取得
 		int unreadComments = projectService.countUnreadCommentsForUser(userId);
-
-		// ユーザーの未確認リアクション通知数を取得
 		int unconfirmedReactions = projectService.countUnconfirmedReactionsForUser(userId);
-
-		// ユーザーの未確認プロジェクトタスク通知数を取得
 		int unconfirmedProjectTasks = projectService.countUnconfirmedProjectTasksForUser(userId);
 
 		// 未処理の招待数、未読コメント通知数、未確認リアクション通知数、未確認プロジェクトタスク通知数を合計
@@ -86,12 +89,15 @@ public class CommentController {
 		// セッションに通知の総数を保存
 		session.setAttribute("totalNotifications", totalNotifications);
 
-		model.addAttribute("project", project); // プロジェクト情報をモデルに追加
+		// モデルにプロジェクト情報、コメント、ページ情報を追加
+		model.addAttribute("project", projectService.getProjectByProjectId(projectId));
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("comments", comments);
+		model.addAttribute("page", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalPages", totalPages);
 
 		return "project/chat";
-
 	}
 
 	// コメントの投稿および更新処理
@@ -128,19 +134,30 @@ public class CommentController {
 	@GetMapping("/comments/edit/{commentId}")
 	public String getEditCommentPage(@PathVariable Integer commentId,
 			@RequestParam Integer projectId,
+			@RequestParam(name = "page", defaultValue = "1") Integer page,
+			@RequestParam(name = "size", defaultValue = "20") Integer size,
 			Model model) {
 
 		Comment comment = projectService.getCommentById(commentId);
 
-		List<Comment> comments = projectService.getCommentsByProjectId(projectId);
+		// コメントをページごとに取得
+		List<Comment> comments = projectService.getCommentsByProjectIdWithPagination(projectId, page, size);
+		Collections.reverse(comments); // 最新のコメントから古いコメントの順に並ぶため、コメントリストを逆順にする
 
-		// projectIdからプロジェクトの情報を取得
-		Project project = projectService.getProjectByProjectId(projectId);
+		// 各コメントにリアクションと添付ファイルを追加
+		projectService.addReactionsAndAttachmentsToComments(comments);
+
+		// コメントの総数を取得し、総ページ数を計算
+		int totalComments = projectService.countCommentsByProjectId(projectId);
+		int totalPages = (int) Math.ceil((double) totalComments / size);
 
 		model.addAttribute("editComment", comment); // 編集対象のコメント
 		model.addAttribute("comments", comments); // コメント一覧
 		model.addAttribute("projectId", projectId); // プロジェクトID
-		model.addAttribute("project", project); // プロジェクト情報をモデルに追加
+		model.addAttribute("project", projectService.getProjectByProjectId(projectId)); // プロジェクト情報をモデルに追加
+		model.addAttribute("page", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalPages", totalPages);
 
 		return "project/chat"; // チャットページに戻る
 	}

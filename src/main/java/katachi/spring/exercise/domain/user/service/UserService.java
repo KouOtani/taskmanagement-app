@@ -4,7 +4,6 @@ import java.util.List;
 
 import katachi.spring.exercise.domain.user.model.AssignedTo;
 import katachi.spring.exercise.domain.user.model.MUser;
-import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
@@ -53,7 +52,7 @@ public interface UserService {
 			TaskStatus status,
 			TaskPriority priority,
 			String dueDateOrder,
-			String tagName);
+			Integer tagId);
 
 	/*個人タスクを取得(1件)*/
 	public Task getPersonalTaskOne(Integer taskId);
@@ -76,7 +75,7 @@ public interface UserService {
 	/*個人タスクを'進行中'に戻す*/
 	public void markAsInProgress(Integer taskId);
 
-	/*プロジェクトを登録*/
-	public void projectEntry(Project project);
+	/*ユーザーに基づくタグを一覧で取得する*/
+	public List<Tag> getTagsForPersonalTasks(Integer userId, Boolean completed);
 
 }

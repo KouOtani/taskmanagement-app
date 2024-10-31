@@ -24,7 +24,8 @@
     </div>
 
     <div class="d-flex justify-content-between">
-      <form class="d-flex" role="search" th:action="@{/project-task}" method="get" style="width: 350px;">
+      <form class="d-flex" role="search" th:action="@{'/project-task/' + ${projectId}}" method="get"
+        style="width: 350px;">
         <input class="form-control me-2" type="search" placeholder="タスク名で検索" aria-label="Search"
           th:value="*{searchQuery}" name="searchQuery">
         <input type="hidden" th:value="*{completed}" name="completed">
@@ -126,7 +127,7 @@
     <ul class="list-group mt-4">
       <!-- タスクアイテム -->
       <li th:each="task : ${projectTasksList}"
-        class="list-group-item d-flex justify-content-between align-items-center py-3">
+        class="list-group-item d-flex justify-content-between align-items-center py-3 rounded shadow">
         <div style="width: 900px;">
           <!-- 締め切り日を過ぎたタスクのメッセージ -->
           <p th:if="${task.dueDate != null and task.dueDate.isBefore(currentDate) and (queryString == null or !queryString.contains('completed=true'))}"
@@ -186,29 +187,34 @@
 
         <div>
           <!-- アクションボタン -->
-          <th:block th:if="${(currentUri.startsWith('/project-task') and (queryString == null or !queryString.contains('completed=true')))
+          <div class="d-flex align-items-center gap-2">
+            <th:block th:if="${(currentUri.startsWith('/project-task') and (queryString == null or !queryString.contains('completed=true')))
            and (project.leaderId == currentUserId or task.user.id == currentUserId)}">
-            <a class="btn btn-sm btn-primary" th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
-            <a class="btn btn-sm btn-danger" th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
-            <form th:action="@{/update/completed/project-task/{id}(id=${task.id})}" method="post"
-              style="display:inline;">
-              <button type="submit" class="btn btn-sm btn-secondary">完了</button>
-              <!-- currentUri の値を hidden フィールドとして設定 -->
-              <input type="hidden" th:value="*{currentUri}" name="currentUri">
-              <input type="hidden" th:value="${task.projectId}" name="projectId">
-            </form>
-          </th:block>
+              <a class="btn btn-sm btn-primary rounded-pill shadow-sm"
+                th:href="@{'/update/project-task/' + ${task.id}}">編集</a>
+              <a class="btn btn-sm btn-danger rounded-pill shadow-sm"
+                th:href="@{'/delete/project-task/' + ${task.id}}">削除</a>
+              <form th:action="@{/update/completed/project-task/{id}(id=${task.id})}" method="post"
+                style="display:inline;">
+                <button type="submit"
+                  class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
+                <!-- currentUri の値を hidden フィールドとして設定 -->
+                <input type="hidden" th:value="*{currentUri}" name="currentUri">
+                <input type="hidden" th:value="${task.projectId}" name="projectId">
+              </form>
+            </th:block>
 
-          <!-- 完了タスクの未完了に戻すボタン -->
-          <th:block th:if="${(currentUri.startsWith('/project-task') and queryString == 'completed=true')
+            <!-- 完了タスクの未完了に戻すボタン -->
+            <th:block th:if="${(currentUri.startsWith('/project-task') and queryString == 'completed=true')
                    and (project.leaderId == currentUserId or task.user.id == currentUserId)}">
-            <form th:action="@{/update/undo/project-task/{id}(id=${task.id})}" method="post"
-              style="display:inline;">
-              <input type="hidden" th:value="${task.projectId}" name="projectId">
-              <button type="submit" class="btn btn-sm btn-secondary">未完了タスクに戻す</button>
-            </form>
-          </th:block>
-
+              <form th:action="@{/update/undo/project-task/{id}(id=${task.id})}" method="post"
+                style="display:inline;">
+                <input type="hidden" th:value="${task.projectId}" name="projectId">
+                <button type="submit"
+                  class="btn btn-sm btn-secondary rounded-pill shadow-sm">未完了タスクに戻す</button>
+              </form>
+            </th:block>
+          </div>
         </div>
       </li>
     </ul>

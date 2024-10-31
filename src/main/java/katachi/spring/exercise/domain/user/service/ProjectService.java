@@ -16,6 +16,7 @@ import katachi.spring.exercise.domain.user.model.Project.ProjectStatus;
 import katachi.spring.exercise.domain.user.model.ProjectMember;
 import katachi.spring.exercise.domain.user.model.ProjectTag;
 import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
+import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
 import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
@@ -40,7 +41,7 @@ public interface ProjectService {
 			Integer leaderId,
 			ProjectStatus status,
 			String dueDateOrder,
-			String tagName);
+			Integer tagId);
 
 	/*所属しているプロジェクトのリーダーを重複なく取得*/
 	public List<Project> getUniqueLeadersByUserId(Integer userId);
@@ -99,6 +100,9 @@ public interface ProjectService {
 	/*プロジェクトに属するメンバーを取得*/
 	public List<ProjectMember> getProjectMembers(Integer projectId);
 
+	/*自分が所属しているプロジェクトのタグ一覧の取得*/
+	public List<Tag> getTagsForProjects(Integer userId);
+
 	/*プロジェクトタスクを取得(１件)*/
 	public Task getProjectTaskOneByTaskId(Integer taskId);
 
@@ -106,7 +110,13 @@ public interface ProjectService {
 	public void createProjectTaskNotification(ProjectTaskNotification notification);
 
 	/*プロジェクチャットト内のコメントを取得*/
-	public List<Comment> getCommentsByProjectId(Integer projectId);
+	public List<Comment> getCommentsByProjectIdWithPagination(Integer projectId, Integer page, Integer size);
+
+	/*リアクションや添付ファイルは別クエリで取得し、コメント情報とコード上で合成*/
+	public void addReactionsAndAttachmentsToComments(List<Comment> comments);
+
+	/*コメントの総数を取得*/
+	public int countCommentsByProjectId(Integer projectId);
 
 	/*プロジェクトチャット内のコメントを保存*/
 	public Integer saveComment(Integer projectId, Integer userId, String content);

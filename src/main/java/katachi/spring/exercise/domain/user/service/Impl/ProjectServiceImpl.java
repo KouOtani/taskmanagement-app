@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import katachi.spring.exercise.domain.user.model.Comment;
 import katachi.spring.exercise.domain.user.model.CommentAttachment;
 import katachi.spring.exercise.domain.user.model.CommentNotification;
+import katachi.spring.exercise.domain.user.model.CommentReaction;
 import katachi.spring.exercise.domain.user.model.CommentReactionNotification;
 import katachi.spring.exercise.domain.user.model.Invitation;
 import katachi.spring.exercise.domain.user.model.Invitation.InvitationStatus;
@@ -22,6 +23,7 @@ import katachi.spring.exercise.domain.user.model.Project.ProjectStatus;
 import katachi.spring.exercise.domain.user.model.ProjectMember;
 import katachi.spring.exercise.domain.user.model.ProjectTag;
 import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
+import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
 import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
@@ -65,10 +67,10 @@ public class ProjectServiceImpl implements ProjectService {
 			Integer leaderId,
 			ProjectStatus status,
 			String dueDateOrder,
-			String tagName) {
+			Integer tagId) {
 
 		// ユーザーが属しているすべてのプロジェクトを取得
-		List<Project> projects = projectMapper.findAllProjects(userId, searchQuery, leaderId, status, dueDateOrder, tagName);
+		List<Project> projects = projectMapper.findAllProjects(userId, searchQuery, leaderId, status, dueDateOrder, tagId);
 		for (Project project : projects) {
 			// プロジェクトごとのタスク数と完了済みタスク数を取得
 			Integer totalTasks = projectMapper.countAllTasksByProjectId(project.getId());
@@ -225,6 +227,12 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectMapper.findMembersByProjectId(projectId);
 	}
 
+	/*自分が所属しているプロジェクトのタグ一覧の取得*/
+	@Override
+	public List<Tag> getTagsForProjects(Integer userId) {
+		return projectMapper.selectTagsForProjects(userId);
+	}
+
 	/*プロジェクトタスクを取得(１件)*/
 	@Override
 	public Task getProjectTaskOneByTaskId(Integer taskId) {
@@ -239,8 +247,29 @@ public class ProjectServiceImpl implements ProjectService {
 
 	/*プロジェクトチャット内のコメントを取得*/
 	@Override
-	public List<Comment> getCommentsByProjectId(Integer projectId) {
-		return projectMapper.getCommentsByProjectId(projectId);
+	public List<Comment> getCommentsByProjectIdWithPagination(Integer projectId, Integer page, Integer size) {
+		Integer offset = (page - 1) * size; // オフセットの計算
+		return projectMapper.getCommentsByProjectIdWithPagination(projectId, offset, size);
+	}
+
+	/*リアクションや添付ファイルは別クエリで取得し、コメント情報とコード上で合成*/
+	@Override
+	public void addReactionsAndAttachmentsToComments(List<Comment> comments) {
+		for (Comment comment : comments) {
+			// 各コメントにリアクションを追加
+			List<CommentReaction> reactors = projectMapper.getReactionsByCommentId(comment.getId());
+			comment.setReactors(reactors);
+
+			// 各コメントに添付ファイルを追加
+			List<CommentAttachment> attachments = projectMapper.getAttachmentsByCommentId(comment.getId());
+			comment.setAttachments(attachments);
+		}
+	}
+
+	/*コメントの総数を取得*/
+	@Override
+	public int countCommentsByProjectId(Integer projectId) {
+		return projectMapper.countCommentsByProjectId(projectId);
 	}
 
 	/*プロジェクトチャット内のコメントを保存*/

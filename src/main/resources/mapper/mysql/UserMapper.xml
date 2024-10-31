@@ -188,13 +188,13 @@
     WHERE
     at.user_id = #{userId}
     AND task.project_id IS NULL  <!-- project_idがnullのものに絞る条件 -->
-    <if test="tagName != null and tagName != ''">
+    <if test="tagId != null">
       AND task.id IN (
       SELECT task.id
       FROM task
       JOIN task_tag tt ON task.id = tt.task_id
       JOIN tag ON tt.tag_id = tag.id
-      WHERE tag.name = #{tagName}
+      WHERE tag.id = #{tagId}
       )
     </if>
     <choose>
@@ -358,5 +358,27 @@
     SET status = 'IN_PROGRESS'
     WHERE id = #{taskId}
   </update>
+
+  <!-- タスクに関連するタグの取得 -->
+  <select id="selectTagsForPersonalTasks" resultType="Tag">
+    SELECT DISTINCT
+    tag.id,
+    tag.name
+    FROM tag
+    INNER JOIN task_tag tt ON tag.id = tt.tag_id
+    INNER JOIN task t ON tt.task_id = t.id
+    INNER JOIN assigned_to at ON t.id = at.task_id
+    WHERE
+    at.user_id = #{userId}
+    AND t.project_id IS NULL  <!-- project_idがnullのものに絞る条件 -->
+    <choose>
+      <when test="completed == true">
+        AND t.status = 'COMPLETED'
+      </when>
+      <otherwise>
+        AND t.status IN ('NOT_STARTED', 'IN_PROGRESS')
+      </otherwise>
+    </choose>
+  </select>
 
 </mapper>

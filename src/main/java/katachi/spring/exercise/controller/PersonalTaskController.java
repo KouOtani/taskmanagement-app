@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import katachi.spring.exercise.application.service.UserApplicationService;
 import katachi.spring.exercise.domain.user.model.ExtendedUser;
+import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
 import katachi.spring.exercise.domain.user.model.Task.TaskStatus;
@@ -48,7 +49,8 @@ public class PersonalTaskController {
 			@RequestParam(required = false) TaskStatus status,
 			@RequestParam(required = false) TaskPriority priority,
 			@RequestParam(required = false) String dueDate, // "asc" or "desc"
-			@RequestParam(required = false) String tagName, // タグフィルタ用
+			@RequestParam(value = "tag", required = false) Integer tagId, // name="tag" の値を取得
+			@RequestParam(required = false) String tagName,
 			Model model) {
 
 		// 現在のユーザー情報を取得
@@ -67,10 +69,13 @@ public class PersonalTaskController {
 				status,
 				priority,
 				dueDate,
-				tagName);
+				tagId);
 
 		// 未完了の個人タスクの個数を、personalTasksList の要素数に置き換え
 		Integer countIncompleteTasks = personalTasksList.size();
+
+		// タグ一覧の取得（完了・未完了に応じて）
+		List<Tag> tagsList = userService.getTagsForPersonalTasks(userDetails.getUserId(), completed);
 
 		// Modelに登録
 		model.addAttribute("personalTodayDueTasks", personalTodayDueTasks);
@@ -84,6 +89,8 @@ public class PersonalTaskController {
 		model.addAttribute("selectedTag", tagName); // 選択したタグを表示
 		model.addAttribute("currentDate", LocalDate.now()); // 現在の日付を取得
 		model.addAttribute("oneWeekFromNow", LocalDate.now().plusWeeks(1)); // // 一週間後の日付を計算
+		model.addAttribute("tagsList", tagsList);
+		model.addAttribute("tagId", tagId);
 
 		// 個人タスクリストを表示
 		return "user/personal-task-list";
