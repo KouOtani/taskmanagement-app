@@ -101,10 +101,20 @@ public interface ProjectMapper {
 	public List<Task> findManyTasksByProjectId(@Param("projectId") Integer projectId,
 			@Param("searchQuery") String searchQuery,
 			@Param("completed") Boolean completed,
-			@Param("userId") Integer userId,
+			@Param("memberId") Integer memberId,
 			@Param("status") TaskStatus status,
 			@Param("priority") TaskPriority priority,
-			@Param("dueDateOrder") String dueDateOrder);
+			@Param("dueDateOrder") String dueDateOrder,
+			@Param("offset") Integer offset,
+			@Param("size") Integer size);
+
+	/*'未完了' '完了' 別にプロジェクトタスク数をカウントする*/
+	public int countProjectTasksByUserId(@Param("projectId") Integer projectId,
+			@Param("memberId") Integer memberId,
+			@Param("searchQuery") String searchQuery,
+			@Param("completed") Boolean completed,
+			@Param("status") TaskStatus status,
+			@Param("priority") TaskPriority priority);
 
 	/*プロジェクトタスク情報を更新するメソッド*/
 	public void updateProjectTask(Task task);

@@ -12,34 +12,31 @@
   <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}" defer></script>
 </head>
 
-<body class="bg-light">
-  <nav class="navbar navbar-expand-lg navbar-light pt-3">
-    <div class="container-fluid">
-      <span class="navbar-brand text-dark" th:text="#{app_name}"></span>
-    </div>
-  </nav>
-
-  <div class="align-items-center py-4">
-    <form method="post" th:action="@{/login}" class="form-login text-center">
-      <h1 class="h3 mb-3">ログインしてください</h1>
-      <p th:if="${session['SPRING_SECURITY_LAST_EXCEPTION']} != null"
-        th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}" class="text-danger">
-        ログインエラーメッセージ
-      </p>
-      <!--ユーザーID-->
-      <div class="form-group mb-3">
-        <label for="email" class="sr-only py-2" th:text="#{email}"></label>
-        <input type="email" class="form-control" placeholder="ユーザーID" name="email" id="email" />
+<body>
+  <div class="login-container">
+    <div>
+      <form method="post" th:action="@{/login}" class="form-login text-center">
+        <h1 class="h3 mb-3">ログインしてください</h1>
+        <p th:if="${session['SPRING_SECURITY_LAST_EXCEPTION']} != null"
+          th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}" class="text-danger">
+          ログインエラーメッセージ
+        </p>
+        <!-- ユーザーID -->
+        <div class="mb-3">
+          <label for="email" class="visually-hidden" th:text="#{email}"></label>
+          <input type="email" class="form-control" placeholder="ユーザーID" name="email" id="email" required>
+        </div>
+        <!-- パスワード -->
+        <div class="mb-4">
+          <label for="password" class="visually-hidden" th:text="#{password}"></label>
+          <input type="password" class="form-control" placeholder="パスワード" name="password" id="password"
+            required>
+        </div>
+        <button class="btn btn-primary w-50" type="submit" th:text="#{login}"></button>
+      </form>
+      <div class="text-center mt-3">
+        <a th:href="@{/user/signup}">新規会員登録はこちら</a>
       </div>
-      <!--パスワード-->
-      <div class="form-group mb-5">
-        <label for="password" class="sr-only py-2" th:text="#{password}"></label>
-        <input type="password" class="form-control" placeholder="パスワード" name="password" id="password" />
-      </div>
-      <button class="btn btn-primary w-50 py-2" type="submit" th:text="#{login}"></button>
-    </form>
-    <div class="text-center">
-      <a th:href="@{/user/signup}">新規会員登録はこちら</a>
     </div>
   </div>
 </body>

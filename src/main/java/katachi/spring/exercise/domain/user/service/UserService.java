@@ -52,7 +52,12 @@ public interface UserService {
 			TaskStatus status,
 			TaskPriority priority,
 			String dueDateOrder,
-			Integer tagId);
+			Integer tagId,
+			Integer page,
+			Integer size);
+
+	/* タスクにタグを追加 */
+	public void addTagsToTasks(List<Task> tasks);
 
 	/*個人タスクを取得(1件)*/
 	public Task getPersonalTaskOne(Integer taskId);
@@ -77,5 +82,13 @@ public interface UserService {
 
 	/*ユーザーに基づくタグを一覧で取得する*/
 	public List<Tag> getTagsForPersonalTasks(Integer userId, Boolean completed);
+
+	/*個人タスクの総数を取得*/
+	public int countTasksByUserId(Integer userId,
+			String searchQuery,
+			Boolean completed,
+			TaskStatus status,
+			TaskPriority priority,
+			Integer tagId);
 
 }

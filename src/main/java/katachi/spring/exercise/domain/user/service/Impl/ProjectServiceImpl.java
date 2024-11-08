@@ -206,11 +206,24 @@ public class ProjectServiceImpl implements ProjectService {
 	public List<Task> getProjectTasks(Integer projectId,
 			String searchQuery,
 			Boolean completed,
-			Integer userId,
+			Integer memberId,
 			TaskStatus status,
 			TaskPriority priority,
-			String dueDateOrder) {
-		return projectMapper.findManyTasksByProjectId(projectId, searchQuery, completed, userId, status, priority, dueDateOrder);
+			String dueDateOrder,
+			Integer page,
+			Integer size) {
+		int offset = (page - 1) * size;
+		return projectMapper.findManyTasksByProjectId(projectId, searchQuery, completed, memberId, status, priority, dueDateOrder, offset, size);
+	}
+
+	/*プロジェクトタスクの総数を取得*/
+	public int countProjectTasksByUserId(Integer projectId,
+			Integer memberId,
+			String searchQuery,
+			Boolean completed,
+			TaskStatus status,
+			TaskPriority priority) {
+		return projectMapper.countProjectTasksByUserId(projectId, memberId, searchQuery, completed, status, priority);
 	}
 
 	/*プロジェクトタスク情報を更新するメソッド*/
@@ -252,7 +265,7 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectMapper.getCommentsByProjectIdWithPagination(projectId, offset, size);
 	}
 
-	/*リアクションや添付ファイルは別クエリで取得し、コメント情報とコード上で合成*/
+	/*リアクションや添付ファイルは別クエリで取得し、コメント情報とコード上で併合*/
 	@Override
 	public void addReactionsAndAttachmentsToComments(List<Comment> comments) {
 		for (Comment comment : comments) {
@@ -321,6 +334,7 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	/*ファイルの情報を取得する*/
+	@Override
 	public CommentAttachment getCommentAttachmentById(Integer attachmentId) {
 		return projectMapper.findCommentAttachmentById(attachmentId); // DBからデータを取得
 	}
@@ -441,11 +455,13 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	/*今日が期日のプロジェクトタスクを複数件取得*/
+	@Override
 	public List<Task> getProjectDueTodayTasks(Integer userId) {
 		return projectMapper.findProjectTodayDueTasks(userId);
 	}
 
 	/*期日まで一週間のプロジェクトタスクを複数件取得*/
+	@Override
 	public List<Task> getProjectDueOneWeekTasks(Integer userId) {
 		return projectMapper.findProjectDueOneWeekTasks(userId);
 	}

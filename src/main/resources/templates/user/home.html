@@ -21,13 +21,13 @@
     <!-- personalPastDueTasks が null でない場合にのみ表示 -->
     <div class="row">
       <div th:if="${personalOneWeekDueTasks != null and !#lists.isEmpty(personalOneWeekDueTasks)}"
-        class="col-md-6">
-        <h4>期日の近い個人タスク</h4>
+        class="col-md-6 bg-light rounded shadow-sm p-4 mb-4">
+        <h4 class="mb-3">期日の近い個人タスク</h4>
         <ul class="list-group">
           <!-- タスクごとにリストアイテムを生成 -->
           <li th:each="task : ${personalOneWeekDueTasks}"
             class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-3 p-3">
-            <div class="p-2" style="width: 340px;">
+            <div class="p-2" style="width: 60%;">
               <h5 class="mb-2" th:text="${task.title}"></h5>
               <!-- 締め切り日 -->
               <p class="text-muted mb-2">
@@ -64,17 +64,17 @@
               </form>
             </div>
           </li>
-
         </ul>
       </div>
 
-      <div th:if="${personalPastDueTasks != null and !#lists.isEmpty(personalPastDueTasks)}" class="col-md-6">
-        <h4>期日が過ぎた個人タスク</h4>
+      <div th:if="${personalPastDueTasks != null and !#lists.isEmpty(personalPastDueTasks)}"
+        class="col-md-6 bg-light rounded shadow-sm p-4 mb-4">
+        <h4 class="mb-3">期日が過ぎた個人タスク</h4>
         <ul class="list-group">
           <!-- タスクごとにリストアイテムを生成 -->
           <li th:each="task : ${personalPastDueTasks}"
             class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-3 p-3">
-            <div class="p-2" style="width: 340px;">
+            <div class="p-2" style="width: 60%;">
               <h5 class="mb-2 font-weight-bold" th:text="${task.title}"></h5>
               <p class="text-muted mb-2">
                 <i class="bi bi-calendar-event"></i> 締め切り:
@@ -106,15 +106,21 @@
       </div>
     </div>
 
+    <!-- セクション間の分割線 -->
+    <div class="border-top border-2 mb-4"
+      th:if="${(projectOneWeekDueTasks != null and !#lists.isEmpty(projectOneWeekDueTasks)) or (projectPastDueTasks != null and !#lists.isEmpty(projectPastDueTasks))}">
+    </div>
+
     <!-- projectPastDueTasks が null でない場合にのみ表示 -->
     <div class="row mt-3">
-      <div th:if="${projectOneWeekDueTasks != null and !#lists.isEmpty(projectOneWeekDueTasks)}" class="col-md-6">
-        <h4>期日の近いプロジェクトタスク</h4>
+      <div th:if="${projectOneWeekDueTasks != null and !#lists.isEmpty(projectOneWeekDueTasks)}"
+        class="col-md-6 bg-light rounded shadow-sm p-4 mb-4">
+        <h4 class="mb-3">期日の近いプロジェクトタスク</h4>
         <ul class="list-group">
           <!-- タスクごとにリストアイテムを生成 -->
           <li th:each="task : ${projectOneWeekDueTasks}"
             class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-3 p-3">
-            <div class="p-2" style="width: 340px;">
+            <div class="p-2" style="width: 60%;">
               <h5 class="text-primary fw-bold mb-2">
                 <a th:href="@{/project}" class="text-primary text-decoration-none">「<span
                     th:text="${task.project.title}"></span>」</a>
@@ -148,13 +154,14 @@
         </ul>
       </div>
 
-      <div th:if="${projectPastDueTasks != null and !#lists.isEmpty(projectPastDueTasks)}" class="col-md-6">
-        <h4>期日が過ぎたプロジェクトタスク</h4>
+      <div th:if="${projectPastDueTasks != null and !#lists.isEmpty(projectPastDueTasks)}"
+        class="col-md-6 bg-light rounded shadow-sm p-4 mb-4">
+        <h4 class="mb-3">期日が過ぎたプロジェクトタスク</h4>
         <ul class="list-group">
           <!-- タスクごとにリストアイテムを生成 -->
           <li th:each="task : ${projectPastDueTasks}"
             class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-3 p-3">
-            <div class="p-2" style="width: 340px;">
+            <div class="p-2" style="width: 60%;">
               <h5 class="text-primary fw-bold mb-2">
                 <a th:href="@{/project-task/{id}(id=${task.projectId})}"
                   class="text-primary text-decoration-none">
@@ -185,89 +192,6 @@
                   class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
                 <input type="hidden" th:value="*{currentUri}" name="currentUri">
               </form>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 進行中のプロジェクトセクションを追加 -->
-    <div th:if="${myProjects != null and !#lists.isEmpty(myProjects)}" class="row mt-4">
-      <div class="col-md-12">
-        <h4>所属プロジェクト</h4>
-        <ul class="list-group">
-          <!-- myProjectsリストをループしてプロジェクトを出力 -->
-          <li th:each="project : ${myProjects}"
-            class="list-group-item d-flex flex-column align-items-start p-3">
-
-            <!-- プロジェクト名をクリック可能にする -->
-            <h5 class="text-primary fw-bold mb-2">
-              <a th:href="@{/project-task/{id}(id=${project.id})}"
-                class="text-primary text-decoration-none">
-                「<span th:text="${project.title}"></span>」
-              </a>
-            </h5>
-
-            <!-- プロジェクトの締め切り情報 -->
-            <p class="mb-1">
-              <strong>締め切り: </strong>
-              <span th:text="${project.dueDate}"></span>
-            </p>
-
-            <!-- プロジェクトステータス -->
-            <p class="mb-1">
-              <strong>ステータス: </strong>
-              <span class="badge"
-                th:classappend="|bg-${project.status.getDisplayValue() == '未着手' ? 'secondary' : (project.status.getDisplayValue() == '進行中' ? 'primary' : 'success')}|"
-                th:text="${project.status.getDisplayValue()}">
-              </span>
-            </p>
-
-            <!-- 残り日数の計算 -->
-            <p class="mb-1">
-              <!-- 締め切り日まで残り 1 日以上の場合 -->
-              <th:block th:if="${project.getDaysUntilDueDate() > 0}">
-                <strong>残り日数: </strong>
-                <span>締め切り日まで残り</span>
-                <span class="fw-bold mx-1" th:text="${project.getDaysUntilDueDate()}"></span> 日
-              </th:block>
-
-              <!-- 締め切り日が今日の場合 -->
-              <th:block
-                th:if="${project.getDaysUntilDueDate() == 0 && project.getDaysSinceDueDate() == 0}">
-                <strong>残り日数: </strong>
-                <span>今日が締め切り日です！</span>
-              </th:block>
-
-              <!-- 締め切り日を過ぎた場合 -->
-              <th:block th:if="${project.getDaysSinceDueDate() > 0}">
-                <strong>残り日数: </strong>
-                <span>締め切り日を過ぎて</span>
-                <span class="fw-bold text-danger mx-1"
-                  th:text="${project.getDaysSinceDueDate()}"></span> 日
-              </th:block>
-
-            </p>
-
-            <!-- プロジェクトメンバーの表示 -->
-            <p class="mb-1">
-              <strong>メンバー: </strong>
-              <span th:each="member : ${project.projectMembersList}"
-                th:text="${member.memberName} + ', '"></span>
-            </p>
-
-            <!-- タスク進捗 (完了タスク/全タスク) -->
-            <p>
-              <strong>タスク進捗: </strong>
-              <span th:text="'完了タスク: ' + ${project.completedTasks} + '/' + ${project.totalTasks}"></span>
-            </p>
-
-            <!-- 進捗バー -->
-            <div class="progress" style="width: 50%;">
-              <div class="progress-bar" role="progressbar" th:style="'width:' + ${project.progress} + '%'"
-                th:aria-valuenow="${project.progress}" aria-valuemin="0" aria-valuemax="100"
-                th:text="${project.progress} + '%'">
-              </div>
             </div>
           </li>
         </ul>

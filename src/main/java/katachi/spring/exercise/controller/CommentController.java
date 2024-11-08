@@ -19,7 +19,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import katachi.spring.exercise.application.service.UserApplicationService;
 import katachi.spring.exercise.domain.user.model.Comment;
-import katachi.spring.exercise.domain.user.model.ExtendedUser;
 import katachi.spring.exercise.domain.user.service.ProjectService;
 
 @Controller
@@ -51,8 +50,7 @@ public class CommentController {
 			Model model) {
 
 		// 現在のユーザー情報を取得
-		ExtendedUser userDetails = applicationService.getCurrentUserDetails();
-		Integer userId = userDetails.getUserId();
+		Integer userId = applicationService.getCurrentUserDetails().getUserId();
 
 		// コメントをページごとに取得
 		List<Comment> comments = projectService.getCommentsByProjectIdWithPagination(projectId, page, size);

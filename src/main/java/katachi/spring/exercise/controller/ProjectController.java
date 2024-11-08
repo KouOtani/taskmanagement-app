@@ -62,7 +62,9 @@ public class ProjectController {
 
 		// 今日期日のプロジェクトタスクを取得
 		List<Task> projectTodayDueTasks = projectService.getProjectDueTodayTasks(userDetails.getUserId());
-		model.addAttribute("projectTodayDueTasks", projectTodayDueTasks);
+
+		// 所属しているプロジェクトを取得する
+		List<Project> myProjects = projectService.getAllProjectsAndProgress(userDetails.getUserId());
 
 		// データベースからプロジェクトのリストを取得して同時に進捗も取得
 		List<Project> projectList = projectService.getAllProjectsAndProgressAndFiltering(userDetails.getUserId(),
@@ -79,7 +81,9 @@ public class ProjectController {
 		List<Tag> tagsList = projectService.getTagsForProjects(userDetails.getUserId());
 
 		// Modelに登録
-		model.addAttribute("personalTodayDueTasks", personalTodayDueTasks);//処理をまとめるように検討する
+		model.addAttribute("personalTodayDueTasks", personalTodayDueTasks);
+		model.addAttribute("projectTodayDueTasks", projectTodayDueTasks);
+		model.addAttribute("myProjects", myProjects);
 		model.addAttribute("projectList", projectList);
 		model.addAttribute("leadersList", leadersList);
 		model.addAttribute("searchQuery", searchQuery);

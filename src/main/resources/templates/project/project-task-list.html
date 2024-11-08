@@ -57,12 +57,12 @@
         <!-- フィルタリングオプション -->
         <div class="d-flex align-items-center">
           <div class="me-4">
-            <label for="userId" class="form-label">担当者:</label>
-            <select id="userId" class="form-select" name="userId" onchange="submitFilterForm()">
+            <label for="memberId" class="form-label">担当者:</label>
+            <select id="memberId" class="form-select" name="memberId" onchange="submitFilterForm()">
               <option value="">すべて</option>
               <option th:each="members : ${projectMembers}" th:value="${members.userId}"
                 th:text="${members.memberName}"
-                th:selected="${userId != null and userId == members.userId}">
+                th:selected="${memberId != null and memberId == members.userId}">
               </option>
             </select>
           </div>
@@ -124,11 +124,11 @@
     </th:block>
 
     <!-- タスクリストのテーブル -->
-    <ul class="list-group mt-4">
+    <ul class="list-group mt-4 w-75">
       <!-- タスクアイテム -->
       <li th:each="task : ${projectTasksList}"
-        class="list-group-item d-flex justify-content-between align-items-center py-3 rounded shadow">
-        <div style="width: 900px;">
+        class="list-group-item d-flex justify-content-between align-items-center py-3 rounded shadow-sm">
+        <div class="w-75">
           <!-- 締め切り日を過ぎたタスクのメッセージ -->
           <p th:if="${task.dueDate != null and task.dueDate.isBefore(currentDate) and (queryString == null or !queryString.contains('completed=true'))}"
             class="text-danger fw-bold fs-5 mb-2">
@@ -217,6 +217,40 @@
           </div>
         </div>
       </li>
+
+      <!-- ページネーション -->
+      <div th:if="${projectTasksList != null and !#lists.isEmpty(projectTasksList)}" class="row mt-2">
+        <div class="col-12 text-center">
+          <ul class="pagination justify-content-center">
+            <!-- 前のページボタン -->
+            <li class="page-item" th:if="${page > 1}">
+              <a class="page-link"
+                th:href="@{|/project-task/${projectId}?page=${page - 1}&size=${size}${currentUri == ('/project-task/' + projectId) && (queryString != null && queryString.contains('completed=true')) ? '&completed=true' : ''}|}"
+                aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+
+            <!-- ページ番号ボタン -->
+            <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
+              <li class="page-item" th:classappend="${pageNum == page} ? 'active'">
+                <a class="page-link" th:text="${pageNum}"
+                  th:href="@{|/project-task/${projectId}?page=${pageNum}&size=${size}${currentUri == ('/project-task/' + projectId) && (queryString != null && queryString.contains('completed=true')) ? '&completed=true' : ''}|}">
+                </a>
+              </li>
+            </th:block>
+
+            <!-- 次のページボタン -->
+            <li class="page-item" th:if="${page < totalPages}">
+              <a class="page-link"
+                th:href="@{|/project-task/${projectId}?page=${page + 1}&size=${size}${currentUri == ('/project-task/' + projectId) && (queryString != null && queryString.contains('completed=true')) ? '&completed=true' : ''}|}"
+                aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </ul>
   </div>
 </body>

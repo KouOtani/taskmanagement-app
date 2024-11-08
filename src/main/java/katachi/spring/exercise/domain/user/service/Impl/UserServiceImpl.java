@@ -84,14 +84,29 @@ public class UserServiceImpl implements UserService {
 
 	/*個人タスクを複数件取得*/
 	@Override
-	public List<Task> getPersonalTasks(Integer userId,
-			String searchQuery,
-			Boolean completed,
-			TaskStatus status,
-			TaskPriority priority,
-			String dueDateOrder,
-			Integer tagId) {
-		return mapper.findManyPersonalTasks(userId, searchQuery, completed, status, priority, dueDateOrder, tagId);
+	public List<Task> getPersonalTasks(Integer userId, String searchQuery, Boolean completed,
+			TaskStatus status, TaskPriority priority, String dueDateOrder,
+			Integer tagId, Integer page, Integer size) {
+		int offset = (page - 1) * size;
+
+		// タスクの基本情報を取得し、フィルタリングを適用
+		List<Task> tasks = mapper.getPersonalTasks(userId, searchQuery, completed, status,
+				priority, dueDateOrder, tagId, offset, size);
+
+		// 各タスクにタグを追加
+		addTagsToTasks(tasks);
+
+		return tasks;
+	}
+
+	/* タスクにタグを追加 */
+	@Override
+	public void addTagsToTasks(List<Task> tasks) {
+		for (Task task : tasks) {
+			// 各タスクに関連するタグを取得
+			List<Tag> tags = mapper.getTagsByTaskId(task.getId());
+			task.setTagsList(tags);
+		}
 	}
 
 	/*期限が過ぎた個人タスクを複数件取得*/
@@ -156,6 +171,16 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<Tag> getTagsForPersonalTasks(Integer userId, Boolean completed) {
 		return mapper.selectTagsForPersonalTasks(userId, completed);
+	}
+
+	/*個人タスクの総数を取得*/
+	public int countTasksByUserId(Integer userId,
+			String searchQuery,
+			Boolean completed,
+			TaskStatus status,
+			TaskPriority priority,
+			Integer tagId) {
+		return mapper.countTasksByUserId(userId, searchQuery, completed, status, priority, tagId);
 	}
 
 }

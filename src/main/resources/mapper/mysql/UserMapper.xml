@@ -166,56 +166,106 @@
   </insert>
 
   <!-- 個人タスク複数件取得 -->
-  <select id="findManyPersonalTasks" resultMap="task">
-    SELECT
-    task.id,
-    task.title,
-    task.description,
-    task.status,
-    task.priority,
-    task.due_date,
-    task.registration_date,
-    tag.id AS tag_id,
-    tag.name AS tag_name
+  <!-- <select id="findManyPersonalTasks" resultMap="task"> -->
+  <!-- SELECT -->
+  <!-- task.id, -->
+  <!-- task.title, -->
+  <!-- task.description, -->
+  <!-- task.status, -->
+  <!-- task.priority, -->
+  <!-- task.due_date, -->
+  <!-- task.registration_date, -->
+  <!-- tag.id AS tag_id, -->
+  <!-- tag.name AS tag_name -->
+  <!-- FROM -->
+  <!-- task -->
+  <!-- LEFT JOIN -->
+  <!-- assigned_to at ON task.id = at.task_id -->
+  <!-- LEFT JOIN -->
+  <!-- task_tag tt ON task.id = tt.task_id -->
+  <!-- LEFT JOIN -->
+  <!-- tag ON tt.tag_id = tag.id -->
+  <!-- WHERE -->
+  <!-- at.user_id = #{userId} -->
+  <!-- AND task.project_id IS NULL project_idがnullのものに絞る条件 -->
+  <!-- <if test="tagId != null"> -->
+  <!-- AND task.id IN ( -->
+  <!-- SELECT task.id -->
+  <!-- FROM task -->
+  <!-- JOIN task_tag tt ON task.id = tt.task_id -->
+  <!-- JOIN tag ON tt.tag_id = tag.id -->
+  <!-- WHERE tag.id = #{tagId} -->
+  <!-- ) -->
+  <!-- </if> -->
+  <!-- <choose> -->
+  <!-- <when test="completed == true"> -->
+  <!-- AND task.status = 'COMPLETED' -->
+  <!-- </when> -->
+  <!-- <otherwise> -->
+  <!-- AND task.status IN ('NOT_STARTED', 'IN_PROGRESS') -->
+  <!-- </otherwise> -->
+  <!-- </choose> -->
+  <!-- <if test="searchQuery != null and searchQuery != ''"> -->
+  <!-- AND task.title LIKE CONCAT('%', #{searchQuery}, '%') -->
+  <!-- </if> -->
+  <!-- <if test="status != null"> -->
+  <!-- AND task.status = #{status} -->
+  <!-- </if> -->
+  <!-- <if test="priority != null"> -->
+  <!-- AND task.priority = #{priority} -->
+  <!-- </if> -->
+  <!-- ORDER BY task.due_date 期日の昇順をデフォルトに設定 -->
+  <!-- <choose> -->
+  <!-- <when test="dueDateOrder == 'desc'"> -->
+  <!-- DESC -->
+  <!-- </when> -->
+  <!-- <otherwise> -->
+  <!-- ASC -->
+  <!-- </otherwise> -->
+  <!-- </choose> -->
+  <!-- LIMIT #{size} OFFSET #{offset} -->
+  <!-- </select> -->
+
+  <!-- 個人タスク複数件取得 -->
+  <select id="getPersonalTasks" resultMap="task">
+    SELECT DISTINCT
+    t.id,
+    t.title,
+    t.description,
+    t.status,
+    t.priority,
+    t.due_date,
+    t.registration_date
     FROM
-    task
+    task t
     LEFT JOIN
-    assigned_to at ON task.id = at.task_id
+    assigned_to at ON t.id = at.task_id
     LEFT JOIN
-    task_tag tt ON task.id = tt.task_id
-    LEFT JOIN
-    tag ON tt.tag_id = tag.id
+    task_tag tt ON t.id = tt.task_id
     WHERE
     at.user_id = #{userId}
-    AND task.project_id IS NULL  <!-- project_idがnullのものに絞る条件 -->
-    <if test="tagId != null">
-      AND task.id IN (
-      SELECT task.id
-      FROM task
-      JOIN task_tag tt ON task.id = tt.task_id
-      JOIN tag ON tt.tag_id = tag.id
-      WHERE tag.id = #{tagId}
-      )
-    </if>
+    AND t.project_id IS NULL
     <choose>
       <when test="completed == true">
-        AND task.status = 'COMPLETED'
+        AND t.status = 'COMPLETED'
       </when>
       <otherwise>
-        AND task.status IN ('NOT_STARTED', 'IN_PROGRESS')
+        AND t.status IN ('NOT_STARTED', 'IN_PROGRESS')
       </otherwise>
     </choose>
     <if test="searchQuery != null and searchQuery != ''">
-      AND task.title LIKE CONCAT('%', #{searchQuery}, '%')
+      AND t.title LIKE CONCAT('%', #{searchQuery}, '%')
     </if>
     <if test="status != null">
-      AND task.status = #{status}
+      AND t.status = #{status}
     </if>
     <if test="priority != null">
-      AND task.priority = #{priority}
+      AND t.priority = #{priority}
     </if>
-    <!-- 期日の昇順をデフォルトに設定 -->
-    ORDER BY task.due_date
+    <if test="tagId != null">
+      AND tt.tag_id = #{tagId}
+    </if>
+    ORDER BY t.due_date <!-- 期日の昇順をデフォルトに設定 -->
     <choose>
       <when test="dueDateOrder == 'desc'">
         DESC
@@ -224,6 +274,20 @@
         ASC
       </otherwise>
     </choose>
+    LIMIT #{size} OFFSET #{offset}
+  </select>
+
+  <!-- 特定のタスクに関連するタグを取得 -->
+  <select id="getTagsByTaskId" resultType="Tag">
+    SELECT
+    tag.id AS id,
+    tag.name AS name
+    FROM
+    task_tag tt
+    JOIN
+    tag ON tt.tag_id = tag.id
+    WHERE
+    tt.task_id = #{taskId}
   </select>
 
   <!-- 期限が過ぎた個人タスクを複数件取得 -->
@@ -379,6 +443,39 @@
         AND t.status IN ('NOT_STARTED', 'IN_PROGRESS')
       </otherwise>
     </choose>
+  </select>
+
+  <!-- '未完了' '完了' 別に個人タスク数をカウントする -->
+  <select id="countTasksByUserId" resultType="int">
+    SELECT COUNT(distinct t.id) FROM task t
+    LEFT JOIN
+    assigned_to at ON t.id = at.task_id
+    LEFT JOIN
+    task_tag tt ON t.id = tt.task_id
+    WHERE
+    at.user_id = #{userId}
+    AND t.project_id IS NULL  <!-- project_idがnullのものに絞る条件 -->
+    <choose>
+      <when test="completed == true">
+        AND t.status = 'COMPLETED'
+      </when>
+      <otherwise>
+        AND t.status IN ('NOT_STARTED', 'IN_PROGRESS')
+      </otherwise>
+    </choose>
+    <if test="searchQuery != null and searchQuery != ''">
+      AND t.title LIKE CONCAT('%', #{searchQuery}, '%')
+    </if>
+    <if test="status != null">
+      AND t.status = #{status}
+    </if>
+    <if test="priority != null">
+      AND t.priority = #{priority}
+    </if>
+    <if test="tagId != null">
+      AND tt.tag_id = #{tagId}
+    </if>
+
   </select>
 
 </mapper>

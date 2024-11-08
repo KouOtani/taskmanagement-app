@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import katachi.spring.exercise.application.service.UserApplicationService;
-import katachi.spring.exercise.domain.user.model.ExtendedUser;
 import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.ProjectMember;
 import katachi.spring.exercise.domain.user.model.Task;
@@ -47,6 +46,8 @@ public class ProjectTaskController {
 		model.addAttribute("statusList", TaskStatus.values());
 		model.addAttribute("priorities", TaskPriority.values());
 
+		System.out.println(request.getRequestURI());
+
 	}
 
 	/* プロジェクトタスクリストを表示 */
@@ -54,34 +55,43 @@ public class ProjectTaskController {
 	public String showProjectTaskPage(@PathVariable("projectId") Integer projectId,
 			@RequestParam(required = false) String searchQuery,
 			@RequestParam(required = false) Boolean completed,
-			@RequestParam(required = false) Integer userId,
+			@RequestParam(required = false) Integer memberId,
 			@RequestParam(required = false) TaskStatus status,
 			@RequestParam(required = false) TaskPriority priority,
 			@RequestParam(required = false) String dueDate,
+			@RequestParam(name = "page", defaultValue = "1") Integer page,
+			@RequestParam(name = "size", defaultValue = "10") Integer size,
 			Model model) {
 
 		// 現在のユーザー情報を取得
-		ExtendedUser userDetails = applicationService.getCurrentUserDetails();
+		Integer currentUserId = applicationService.getCurrentUserDetails().getUserId();
 
 		// 今日期日の個人タスクを取得
-		List<Task> personalTodayDueTasks = userService.getPersonalDueTodayTasks(userDetails.getUserId());
+		List<Task> personalTodayDueTasks = userService.getPersonalDueTodayTasks(currentUserId);
 		model.addAttribute("personalTodayDueTasks", personalTodayDueTasks);
 
 		// 今日期日のプロジェクトタスクを取得
-		List<Task> projectTodayDueTasks = projectService.getProjectDueTodayTasks(userDetails.getUserId());
+		List<Task> projectTodayDueTasks = projectService.getProjectDueTodayTasks(currentUserId);
 		model.addAttribute("projectTodayDueTasks", projectTodayDueTasks);
+
+		// 所属しているプロジェクトを取得する
+		List<Project> myProjects = projectService.getAllProjectsAndProgress(currentUserId);
+		model.addAttribute("myProjects", myProjects);
 
 		// プロジェクトIDに関連するタスクを取得（フィルタリングなども行う）
 		List<Task> projectTasksList = projectService.getProjectTasks(projectId,
 				searchQuery,
 				completed,
-				userId,
+				memberId,
 				status,
 				priority,
-				dueDate);
+				dueDate,
+				page,
+				size);
 
-		// 未完了のプロジェクトタスクの個数を、projectTasksList の要素数に置き換え
-		Integer countIncompleteProjectTasks = projectTasksList.size();
+		// タスクの総数を取得し、総ページ数を計算
+		int totalTasks = projectService.countProjectTasksByUserId(projectId, memberId, searchQuery, completed, status, priority);
+		int totalPages = Math.max(1, (int) Math.ceil((double) totalTasks / size));
 
 		// プロジェクトに属するメンバーを取得
 		List<ProjectMember> projectMembers = projectService.getProjectMembers(projectId);
@@ -90,19 +100,19 @@ public class ProjectTaskController {
 		Project project = projectService.getProjectByProjectId(projectId);
 
 		// プロジェクトに基づいたプロジェクトタスクの通知を削除
-		projectService.clearProjectTaskNotifications(userDetails.getUserId(), projectId);
+		projectService.clearProjectTaskNotifications(currentUserId, projectId);
 
 		// ユーザーの未処理の招待数を取得
-		int pendingInvitations = projectService.countPendingInvitationsForUser(userDetails.getUserId());
+		int pendingInvitations = projectService.countPendingInvitationsForUser(currentUserId);
 
 		// ユーザーの未読コメント通知数を取得
-		int unreadComments = projectService.countUnreadCommentsForUser(userDetails.getUserId());
+		int unreadComments = projectService.countUnreadCommentsForUser(currentUserId);
 
 		// ユーザーの未確認リアクション通知数を取得
-		int unconfirmedReactions = projectService.countUnconfirmedReactionsForUser(userDetails.getUserId());
+		int unconfirmedReactions = projectService.countUnconfirmedReactionsForUser(currentUserId);
 
 		// ユーザーの未確認プロジェクトタスク通知数を取得
-		int unconfirmedProjectTasks = projectService.countUnconfirmedProjectTasksForUser(userDetails.getUserId());
+		int unconfirmedProjectTasks = projectService.countUnconfirmedProjectTasksForUser(currentUserId);
 
 		// 未処理の招待数、未読コメント通知数、未確認リアクション通知数、未確認プロジェクトタスク通知数を合計
 		int totalNotifications = pendingInvitations + unreadComments + unconfirmedReactions + unconfirmedProjectTasks;
@@ -112,19 +122,22 @@ public class ProjectTaskController {
 
 		// Modelに登録
 		model.addAttribute("projectTasksList", projectTasksList);
-		model.addAttribute("countIncompleteProjectTasks", countIncompleteProjectTasks);
+		model.addAttribute("countIncompleteProjectTasks", totalTasks);
 		model.addAttribute("projectMembers", projectMembers); // プロジェクトメンバーをモデルに追加
 		model.addAttribute("project", project); // プロジェクト情報をモデルに追加
 		model.addAttribute("projectId", projectId); // プロジェクトIDをモデルに追加
 		model.addAttribute("completed", completed);
 		model.addAttribute("searchQuery", searchQuery);
-		model.addAttribute("userId", userId);
+		model.addAttribute("memberId", memberId);
 		model.addAttribute("status", status);
 		model.addAttribute("priority", priority);
 		model.addAttribute("dueDate", dueDate);
 		model.addAttribute("currentDate", LocalDate.now());
 		model.addAttribute("oneWeekFromNow", LocalDate.now().plusWeeks(1));
-		model.addAttribute("currentUserId", userDetails.getUserId());
+		model.addAttribute("currentUserId", currentUserId);
+		model.addAttribute("page", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalPages", totalPages);
 
 		// プロジェクト内タスクリストを表示
 		return "project/project-task-list";

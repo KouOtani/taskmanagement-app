@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletRequest;
 import katachi.spring.exercise.application.service.UserApplicationService;
-import katachi.spring.exercise.domain.user.model.ExtendedUser;
+import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.Tag;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.model.Task.TaskPriority;
@@ -40,6 +40,7 @@ public class PersonalTaskController {
 		model.addAttribute("queryString", request.getQueryString());
 		model.addAttribute("statusList", TaskStatus.values());
 		model.addAttribute("priorities", TaskPriority.values());
+
 	}
 
 	/* 個人タスクリストを表示 */
@@ -51,36 +52,46 @@ public class PersonalTaskController {
 			@RequestParam(required = false) String dueDate, // "asc" or "desc"
 			@RequestParam(value = "tag", required = false) Integer tagId, // name="tag" の値を取得
 			@RequestParam(required = false) String tagName,
+			@RequestParam(name = "page", defaultValue = "1") Integer page,
+			@RequestParam(name = "size", defaultValue = "10") Integer size,
 			Model model) {
 
 		// 現在のユーザー情報を取得
-		ExtendedUser userDetails = applicationService.getCurrentUserDetails();
+		Integer userId = applicationService.getCurrentUserDetails().getUserId();
 
 		// 今日期日の個人タスクを取得
-		List<Task> personalTodayDueTasks = userService.getPersonalDueTodayTasks(userDetails.getUserId());
+		List<Task> personalTodayDueTasks = userService.getPersonalDueTodayTasks(userId);
+
 		// 今日期日のプロジェクトタスクを取得
-		List<Task> projectTodayDueTasks = projectService.getProjectDueTodayTasks(userDetails.getUserId());
-		model.addAttribute("projectTodayDueTasks", projectTodayDueTasks);
+		List<Task> projectTodayDueTasks = projectService.getProjectDueTodayTasks(userId);
+
+		// 所属しているプロジェクトを取得する
+		List<Project> myProjects = projectService.getAllProjectsAndProgress(userId);
 
 		// 個人タスクをフィルタリングして一覧で取得
-		List<Task> personalTasksList = userService.getPersonalTasks(userDetails.getUserId(),
+		List<Task> personalTasksList = userService.getPersonalTasks(userId,
 				searchQuery,
 				completed,
 				status,
 				priority,
 				dueDate,
-				tagId);
+				tagId,
+				page,
+				size);
 
-		// 未完了の個人タスクの個数を、personalTasksList の要素数に置き換え
-		Integer countIncompleteTasks = personalTasksList.size();
+		// タスクの総数を取得し、総ページ数を計算
+		int totalTasks = userService.countTasksByUserId(userId, searchQuery, completed, status, priority, tagId);
+		int totalPages = Math.max(1, (int) Math.ceil((double) totalTasks / size));
 
 		// タグ一覧の取得（完了・未完了に応じて）
-		List<Tag> tagsList = userService.getTagsForPersonalTasks(userDetails.getUserId(), completed);
+		List<Tag> tagsList = userService.getTagsForPersonalTasks(userId, completed);
 
 		// Modelに登録
 		model.addAttribute("personalTodayDueTasks", personalTodayDueTasks);
 		model.addAttribute("personalTasksList", personalTasksList);
-		model.addAttribute("countIncompleteTasks", countIncompleteTasks);
+		model.addAttribute("countIncompleteTasks", totalTasks);
+		model.addAttribute("projectTodayDueTasks", projectTodayDueTasks);
+		model.addAttribute("myProjects", myProjects);
 		model.addAttribute("completed", completed);
 		model.addAttribute("searchQuery", searchQuery);
 		model.addAttribute("status", status);
@@ -91,6 +102,9 @@ public class PersonalTaskController {
 		model.addAttribute("oneWeekFromNow", LocalDate.now().plusWeeks(1)); // // 一週間後の日付を計算
 		model.addAttribute("tagsList", tagsList);
 		model.addAttribute("tagId", tagId);
+		model.addAttribute("page", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalPages", totalPages);
 
 		// 個人タスクリストを表示
 		return "user/personal-task-list";

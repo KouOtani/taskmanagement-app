@@ -41,13 +41,18 @@ public interface UserMapper {
 	public int insertAssignedTo(AssignedTo assignedTo);
 
 	/*個人タスクを複数件取得*/
-	public List<Task> findManyPersonalTasks(@Param("userId") Integer userId,
+	public List<Task> getPersonalTasks(@Param("userId") Integer userId,
 			@Param("searchQuery") String searchQuery,
 			@Param("completed") Boolean completed,
 			@Param("status") TaskStatus status,
 			@Param("priority") TaskPriority priority,
 			@Param("dueDateOrder") String dueDateOrder,
-			@Param("tagId") Integer tagId);
+			@Param("tagId") Integer tagId,
+			@Param("offset") Integer offset,
+			@Param("size") Integer size);
+
+	/*タスクにタグを追加するメソッド*/
+	public List<Tag> getTagsByTaskId(@Param("taskId") Integer taskId);
 
 	/*期限が過ぎた個人タスクを複数件取得*/
 	public List<Task> findPersonalPastDueTasks(Integer userId);
@@ -82,5 +87,13 @@ public interface UserMapper {
 	/*ユーザーに基づくタグを一覧で取得する*/
 	public List<Tag> selectTagsForPersonalTasks(@Param("userId") Integer userId,
 			@Param("completed") Boolean completed);
+
+	/*'未完了' '完了' 別に個人タスク数をカウントする*/
+	public int countTasksByUserId(@Param("userId") Integer userId,
+			@Param("searchQuery") String searchQuery,
+			@Param("completed") Boolean completed,
+			@Param("status") TaskStatus status,
+			@Param("priority") TaskPriority priority,
+			@Param("tagId") Integer tagId);
 
 }

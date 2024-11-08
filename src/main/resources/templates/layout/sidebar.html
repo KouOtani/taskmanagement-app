@@ -9,7 +9,8 @@
   <!-- サイドバー -->
   <aside layout:fragment="sidebar" class="col-md-3 p-3">
     <h2 class="font-monospace">Today's Tasks</h2>
-    <ul class="list-group">
+    <ul class="list-group mb-3">
+      <!-- 今日が期日の個人タスクセクション -->
       <li class="list-group-item">
         <h5 class="mt-2">今日が期日の個人タスク</h5>
         <th:block th:if="${personalTodayDueTasks != null and !#lists.isEmpty(personalTodayDueTasks)}">
@@ -28,7 +29,8 @@
               <div>
                 <form th:action="@{/update/completed/{id}(id=${task.id})}" method="post"
                   style="display:inline;">
-                  <button type="submit" class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
+                  <button type="submit"
+                    class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
                   <input type="hidden" th:value="*{currentUri}" name="currentUri">
                 </form>
               </div>
@@ -42,6 +44,7 @@
         </th:block>
       </li>
 
+      <!-- 今日が期日のプロジェクトタスクセクション -->
       <li class="list-group-item mt-3">
         <h5 class="mt-2">今日が期日のプロジェクトタスク</h5>
         <th:block th:if="${projectTodayDueTasks != null and !#lists.isEmpty(projectTodayDueTasks)}">
@@ -61,7 +64,8 @@
               <div>
                 <form th:action="@{/update/completed/project-task/{id}(id=${task.id})}" method="post"
                   style="display:inline;">
-                  <button type="submit" class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
+                  <button type="submit"
+                    class="btn btn-sm btn-secondary rounded-pill shadow-sm">完了</button>
                   <input type="hidden" th:value="*{currentUri}" name="currentUri">
                 </form>
               </div>
@@ -71,6 +75,78 @@
         <th:block th:unless="${projectTodayDueTasks != null and !#lists.isEmpty(projectTodayDueTasks)}">
           <div class="alert alert-secondary mt-3 rounded shadow-sm" role="alert">
             今日が期日のプロジェクトタスクはありません。
+          </div>
+        </th:block>
+      </li>
+    </ul>
+
+    <h2 class="font-monospace">My Projects</h2>
+    <ul class="list-group">
+      <!-- 所属プロジェクトセクション -->
+      <li class="list-group-item">
+        <h5 class="mt-2">所属プロジェクト</h5>
+        <th:block th:if="${myProjects != null and !#lists.isEmpty(myProjects)}">
+          <ul th:each="project : ${myProjects}" class="list-group mt-3">
+            <li
+              class="list-group-item d-flex flex-column align-items-start p-3 rounded shadow-sm bg-white mb-2">
+              <!-- プロジェクト名 -->
+              <h6 class="text-primary fw-bold">
+                <a th:href="@{/project-task/{id}(id=${project.id})}"
+                  class="text-primary text-decoration-none">
+                  「<span th:text="${project.title}"></span>」
+                </a>
+              </h6>
+
+              <!-- プロジェクトの締め切り情報 -->
+              <p class="mb-1">
+                <strong>締め切り: </strong><span th:text="${project.dueDate}"></span>
+              </p>
+
+              <!-- 残り日数の計算 -->
+              <p class="mb-1">
+                <!-- 締め切り日まで残り 1 日以上の場合 -->
+                <th:block th:if="${project.getDaysUntilDueDate() > 0}">
+                  <strong>残り日数: </strong>
+                  <span>締め切り日まで残り</span>
+                  <span class="fw-bold mx-1" th:text="${project.getDaysUntilDueDate()}"></span> 日
+                </th:block>
+
+                <!-- 締め切り日が今日の場合 -->
+                <th:block
+                  th:if="${project.getDaysUntilDueDate() == 0 && project.getDaysSinceDueDate() == 0}">
+                  <strong>残り日数: </strong>
+                  <span>今日が締め切り日です！</span>
+                </th:block>
+
+                <!-- 締め切り日を過ぎた場合 -->
+                <th:block th:if="${project.getDaysSinceDueDate() > 0}">
+                  <strong>残り日数: </strong>
+                  <span>締め切り日を過ぎて</span>
+                  <span class="fw-bold text-danger mx-1"
+                    th:text="${project.getDaysSinceDueDate()}"></span> 日
+                </th:block>
+              </p>
+
+              <!-- タスク進捗 (完了タスク/全タスク) -->
+              <p>
+                <strong>タスク進捗: </strong>
+                <span
+                  th:text="'完了タスク: ' + ${project.completedTasks} + '/' + ${project.totalTasks}"></span>
+              </p>
+              <!-- 進捗バー -->
+              <div class="progress" style="width: 100%;">
+                <div class="progress-bar" role="progressbar"
+                  th:style="'width:' + ${project.progress} + '%'"
+                  th:aria-valuenow="${project.progress}" aria-valuemin="0" aria-valuemax="100"
+                  th:text="${project.progress} + '%'">
+                </div>
+              </div>
+            </li>
+          </ul>
+        </th:block>
+        <th:block th:unless="${myProjects != null and !#lists.isEmpty(myProjects)}">
+          <div class="alert alert-secondary mt-3 rounded shadow-sm" role="alert">
+            所属しているプロジェクトはありません。
           </div>
         </th:block>
       </li>

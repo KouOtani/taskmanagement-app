@@ -54,9 +54,9 @@
               ようこそ <span sec:authentication="principal.fullName"></span>さん
             </span>
           </li>
-          <li class="nav-item ms-3">
+          <li class="nav-item ms-3 my-auto">
             <form method="post" th:action="@{/logout}">
-              <button class="btn btn-outline-danger" type="submit" th:text="#{logout}"></button>
+              <button class="btn btn-sm btn-outline-danger" type="submit" th:text="#{logout}"></button>
             </form>
           </li>
         </ul>

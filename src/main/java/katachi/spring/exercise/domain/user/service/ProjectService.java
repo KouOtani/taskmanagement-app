@@ -89,10 +89,20 @@ public interface ProjectService {
 	public List<Task> getProjectTasks(Integer projectId,
 			String searchQuery,
 			Boolean completed,
-			Integer userId,
+			Integer memberId,
 			TaskStatus status,
 			TaskPriority priority,
-			String dueDateOrder);
+			String dueDateOrder,
+			Integer page,
+			Integer size);
+
+	/*プロジェクトタスクの総数を取得*/
+	public int countProjectTasksByUserId(Integer projectId,
+			Integer memberId,
+			String searchQuery,
+			Boolean completed,
+			TaskStatus status,
+			TaskPriority priority);
 
 	/*プロジェクトタスク情報を更新するメソッド*/
 	public void updateTask(Task task, Integer assigneeId);

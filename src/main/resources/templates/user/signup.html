@@ -14,15 +14,10 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light pt-3">
-    <div class="container-fluid">
-      <span class="navbar-brand text-dark" th:text="#{app_name}"></span>
-    </div>
-  </nav>
   <div class="container py-4">
     <h1 class="h2 mt-40 text-center">新規会員登録</h1>
     <p class="text-danger text-center fw-bold">* は必須入力です</p>
-    <form th:action="@{/user/signup-confirm}" method="post" class="form-signup mx-auto" style="max-width: 500px;"
+    <form th:action="@{/user/signup-confirm}" method="post" class="mx-auto form-signup" style="max-width: 500px;"
       th:object="${signupForm}">
       <!-- 名前（familyName）と名前（firstName）を横並びにする -->
       <div class="mb-3">

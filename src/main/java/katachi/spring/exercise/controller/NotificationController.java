@@ -23,6 +23,7 @@ import katachi.spring.exercise.domain.user.model.CommentReactionNotification;
 import katachi.spring.exercise.domain.user.model.ExtendedUser;
 import katachi.spring.exercise.domain.user.model.Invitation;
 import katachi.spring.exercise.domain.user.model.Invitation.InvitationStatus;
+import katachi.spring.exercise.domain.user.model.Project;
 import katachi.spring.exercise.domain.user.model.ProjectTaskNotification;
 import katachi.spring.exercise.domain.user.model.Task;
 import katachi.spring.exercise.domain.user.service.ProjectService;
@@ -55,10 +56,12 @@ public class NotificationController {
 
 		// 今日期日の個人タスクを取得
 		List<Task> personalTodayDueTasks = userService.getPersonalDueTodayTasks(userDetails.getUserId());
-		model.addAttribute("personalTodayDueTasks", personalTodayDueTasks);
+
 		// 今日期日のプロジェクトタスクを取得
 		List<Task> projectTodayDueTasks = projectService.getProjectDueTodayTasks(userDetails.getUserId());
-		model.addAttribute("projectTodayDueTasks", projectTodayDueTasks);
+
+		// 所属しているプロジェクトを取得する
+		List<Project> myProjects = projectService.getAllProjectsAndProgress(userDetails.getUserId());
 
 		// 招待の通知を取得
 		List<Invitation> invitationDetailsList = projectService.getInvitationsByUserId(userDetails.getUserId());
@@ -98,8 +101,10 @@ public class NotificationController {
 		// 作成日時(createdAt)でソート（新しい順）
 		notifications.sort(Comparator.comparing(NotificationDTO::getCreatedAt).reversed());
 
-		// 統合された通知リストをビューに渡す
-		model.addAttribute("notifications", notifications);
+		model.addAttribute("notifications", notifications); // 統合された通知リストをビューに渡す
+		model.addAttribute("personalTodayDueTasks", personalTodayDueTasks);
+		model.addAttribute("projectTodayDueTasks", projectTodayDueTasks);
+		model.addAttribute("myProjects", myProjects);
 
 		return "user/notification";
 	}

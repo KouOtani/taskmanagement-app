@@ -127,11 +127,11 @@
     </h3>
 
     <!-- タスクリストのテーブル -->
-    <ul class="list-group mt-4">
+    <ul class="list-group mt-4 w-75">
       <!-- タスクアイテム -->
       <li th:each="task : ${personalTasksList}"
-        class="list-group-item d-flex justify-content-between align-items-center py-3 rounded shadow">
-        <div style="width: 900px;">
+        class="list-group-item d-flex justify-content-between align-items-center py-3 rounded shadow-sm">
+        <div class="w-75">
           <!-- 締め切り日を過ぎたタスクのメッセージ -->
           <p th:if="${task.dueDate != null and task.dueDate.isBefore(currentDate) and (queryString == null or !queryString.contains('completed=true'))}"
             class="text-danger fw-bold fs-5 mb-2">
@@ -215,7 +215,7 @@
                 <input type="hidden" th:value="*{currentUri}" name="currentUri">
               </form>
             </th:block>
-            <th:block th:if="${currentUri == '/personal-task' and queryString == 'completed=true'}">
+            <th:block th:if="${currentUri == '/personal-task' and (queryString != null and queryString.contains('completed=true'))}">
               <form th:action="@{/update/undo/{id}(id=${task.id})}" method="post" style="display:inline;">
                 <button type="submit"
                   class="btn btn-sm btn-secondary rounded-pill shadow-sm">未完了タスクに戻す</button>
@@ -224,6 +224,40 @@
           </div>
         </div>
       </li>
+
+      <!-- ページネーション -->
+      <div th:if="${personalTasksList != null and !#lists.isEmpty(personalTasksList)}" class="row mt-2">
+        <div class="col-12 text-center">
+          <ul class="pagination justify-content-center">
+            <!-- 前のページボタン -->
+            <li class="page-item" th:if="${page > 1}">
+              <a class="page-link"
+                th:href="@{|/personal-task?page=${page - 1}&size=${size}${currentUri == '/personal-task' and (queryString != null and queryString.contains('completed=true')) ? '&completed=true' : ''}|}"
+                aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+
+            <!-- ページ番号ボタン -->
+            <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
+              <li class="page-item" th:classappend="${pageNum == page} ? 'active'">
+                <a class="page-link" th:text="${pageNum}"
+                  th:href="@{|/personal-task?page=${pageNum}&size=${size}${currentUri == '/personal-task' and (queryString != null and queryString.contains('completed=true')) ? '&completed=true' : ''}|}">
+                </a>
+              </li>
+            </th:block>
+
+            <!-- 次のページボタン -->
+            <li class="page-item" th:if="${page < totalPages}">
+              <a class="page-link"
+                th:href="@{|/personal-task?page=${page + 1}&size=${size}${currentUri == '/personal-task' and (queryString != null and queryString.contains('completed=true')) ? '&completed=true' : ''}|}"
+                aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </ul>
   </div>
 </body>
