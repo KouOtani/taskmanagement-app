@@ -3,6 +3,7 @@ package katachi.spring.exercise.config;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,10 +35,10 @@ public class SecurityConfig {
 
 		//ログイン不要ページの設定
 		http.authorizeHttpRequests(authorize -> authorize
-				.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() //直リンクOK
-				.requestMatchers(mvc.pattern("/user/signup")).permitAll() //直リンクOK
-				.requestMatchers(mvc.pattern("/user/signup-confirm")).permitAll() //直リンクOK
-				.anyRequest().authenticated()); //それ以外は直リンクNG
+				.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 静的リソースは直リンクOK
+				.requestMatchers(mvc.pattern("/user/signup")).permitAll() // サインアップページへの直リンクOK
+				.requestMatchers(HttpMethod.POST, "/user/signup-confirm").permitAll() // /user/signup-confirm への POST リクエストのみ許可
+				.anyRequest().authenticated()); // それ以外は認証が必要
 
 		//ログイン処理
 		http.formLogin(login -> login

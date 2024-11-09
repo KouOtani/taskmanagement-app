@@ -140,7 +140,7 @@
             th:value="${editComment != null} ? ${editComment.id} : null" />
           <div class="form-group rounded shadow-sm">
             <textarea id="edit" name="content" class="form-control" rows="3" placeholder="コメントを入力..."
-              required th:text="${editComment != null} ? ${editComment.content} : ''"></textarea>
+              th:text="${editComment != null} ? ${editComment.content} : ''"></textarea>
           </div>
           <!-- ファイル添付 -->
           <div class="form-group d-flex mt-2">
@@ -148,6 +148,12 @@
             <input class="form-control form-control-sm w-50 ms-3" type="file" name="attachments"
               id="attachments" multiple>
           </div>
+
+          <th:block th:if="${emptyComment}">
+            <div class="alert alert-danger rounded shadow-sm p-2 mb-2 w-50" th:text="${emptyComment}"
+              style="font-size: 0.875rem;">
+            </div>
+          </th:block>
 
           <button type="submit" class="btn btn-primary mt-2">
             <span th:text="${editComment != null ? '編集を保存' : '投稿'}"></span>

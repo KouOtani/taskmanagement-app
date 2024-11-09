@@ -1,6 +1,7 @@
 package katachi.spring.exercise.controller;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -104,7 +106,18 @@ public class CommentController {
 			@RequestParam("userId") Integer userId,
 			@RequestParam("content") String content,
 			@RequestParam(required = false) Integer commentId,
-			@RequestParam("attachments") MultipartFile[] attachments) throws IOException {
+			@RequestParam("attachments") MultipartFile[] attachments,
+			RedirectAttributes redirectAttributes) throws IOException {
+
+		// コメント内容が空の場合、添付ファイルの有無を確認
+		boolean isContentEmpty = (content == null || content.trim().isEmpty());
+		boolean hasAttachments = attachments != null && Arrays.stream(attachments).anyMatch(attachment -> !attachment.isEmpty());
+
+		if (isContentEmpty && !hasAttachments) {
+			// エラー処理：テキストエリアが空で添付ファイルもない場合
+			redirectAttributes.addFlashAttribute("emptyComment", "コメントまたは添付ファイルを入力してください。");
+			return "redirect:/project/chat/" + projectId;
+		}
 
 		if (commentId != null) {
 			// コメントを更新

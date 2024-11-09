@@ -49,13 +49,6 @@ public class SignupController {
 		return "user/signup";
 	}
 
-	@GetMapping("/signup-confirm")
-	public String confirmSignup() {
-
-		// ログイン画面にリダイレクト
-		return "redirect:/login";
-	}
-
 	/**
 	 * ユーザー登録フォームの入力チェックを行い、確認画面に遷移します。
 	 *
