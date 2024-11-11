@@ -7,22 +7,40 @@
 
 ## 主な機能
 - **タスク管理**: タスクの追加、編集、削除が可能で、優先度や期限も設定できます。<br>
-https://github.com/user-attachments/assets/92ece20d-72ef-4937-a921-1b082be5638d
+
+
+https://github.com/user-attachments/assets/9d94578e-92f3-4045-b5d7-949875fb4df1
+
 
 - **プロジェクト作成・管理**: 新しいプロジェクトを作成し、概要や進行状況を管理できます。<br>
-https://github.com/user-attachments/assets/48e2d88b-3eb1-49ad-af29-e77d854e371f
+
+
+https://github.com/user-attachments/assets/dcf84c3a-9a0a-4dba-a745-21d6e60dfd5f
+
 
 - **メンバー管理**: プロジェクトにメンバーを追加し、役割を割り当て、チームでの役割分担を明確化。<br>
-https://github.com/user-attachments/assets/94191224-4a4f-4a7e-bba6-518b555be842
+
+
+https://github.com/user-attachments/assets/fbb9da74-5303-4220-b248-d28c9f8d9be6
+
 
 - **チャット機能**: プロジェクトメンバーがリアルタイムでコミュニケーションできるチャット機能。<br>
-https://github.com/user-attachments/assets/24e5a69b-1477-4c7b-b8fa-737c3597ce6b
+
+
+https://github.com/user-attachments/assets/ff91beee-75de-4be3-be02-70193c07417d
+
 
 - **通知機能**: メンバーに通知が届くため、チーム全体での情報共有が可能。<br>
-https://github.com/user-attachments/assets/5486cb8d-5e35-4f81-b9ee-56234afd06ba
+
+
+https://github.com/user-attachments/assets/26b41837-2dba-49a9-931a-557581f4b094
+
 
 - **タグ管理**: タスクやプロジェクトにタグを付けることで、検索やフィルタリングが容易に。<br>
-https://github.com/user-attachments/assets/f7cd0fc8-5d09-4054-9469-c1a9f9a85392
+
+
+https://github.com/user-attachments/assets/2282a719-1f6c-4897-93cc-8060456c1b16
+
 
 ## 技術スタック
 ### フロントエンド
