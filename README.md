@@ -12,10 +12,12 @@
 https://github.com/user-attachments/assets/92ece20d-72ef-4937-a921-1b082be5638d
 
 
+
 - **プロジェクト作成・管理**: 新しいプロジェクトを作成し、概要や進行状況を管理できます。<br>
 
 
 https://github.com/user-attachments/assets/48e2d88b-3eb1-49ad-af29-e77d854e371f
+
 
 
 - **メンバー管理**: プロジェクトにメンバーを追加し、役割を割り当て、チームでの役割分担を明確化。<br>
@@ -24,16 +26,19 @@ https://github.com/user-attachments/assets/48e2d88b-3eb1-49ad-af29-e77d854e371f
 https://github.com/user-attachments/assets/94191224-4a4f-4a7e-bba6-518b555be842
 
 
+
 - **チャット機能**: プロジェクトメンバーがリアルタイムでコミュニケーションできるチャット機能。<br>
 
 
 https://github.com/user-attachments/assets/24e5a69b-1477-4c7b-b8fa-737c3597ce6b
 
 
+
 - **通知機能**: メンバーに通知が届くため、チーム全体での情報共有が可能。<br>
 
 
 https://github.com/user-attachments/assets/5486cb8d-5e35-4f81-b9ee-56234afd06ba
+
 
 
 - **タグ管理**: タスクやプロジェクトにタグを付けることで、検索やフィルタリングが容易に。<br>
